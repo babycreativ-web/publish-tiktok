@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+env/
+
+# Environment Variables
+.env
+tiktok_tokens.json
+
+# Project Specific
+temp/
+output/
+*.log
+*.mp4
+*.mp3
+
+# IDE
+.vs/
+.vscode/
+.idea/

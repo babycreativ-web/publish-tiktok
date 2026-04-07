@@ -1,0 +1,66 @@
+name: Viral Video Pipeline
+
+on:
+  schedule:
+    # 10 AM ET (14:00 UTC)
+    - cron: '0 14 * * *'
+    # 3 PM ET (19:00 UTC)
+    - cron: '0 19 * * *'
+    # 9 PM ET (01:00 UTC next day)
+    - cron: '0 1 * * *'
+  workflow_dispatch: # Allows manual trigger
+
+jobs:
+  build-and-post:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/set-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install System Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg imagemagick
+          # Fix ImageMagick security policy to allow TextClip
+          sudo sed -i 's/domain="coder" rights="none" pattern="LABEL"/domain="coder" rights="read|write" pattern="LABEL"/' /etc/ImageMagick-6/policy.xml || true
+
+      - name: Install Python Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Create TikTok Token File
+        run: |
+          echo '${{ secrets.TIKTOK_TOKENS_JSON }}' > tiktok_tokens.json
+
+      - name: Run Video Generation
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+          ELEVEN_API_KEY: ${{ secrets.ELEVEN_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEY_BACKUP: ${{ secrets.GEMINI_API_KEY_BACKUP }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          COHERE_API_KEY: ${{ secrets.COHERE_API_KEY }}
+          TIKTOK_CLIENT_KEY: ${{ secrets.TIKTOK_CLIENT_KEY }}
+          TIKTOK_CLIENT_SECRET: ${{ secrets.TIKTOK_CLIENT_SECRET }}
+        run: python main.py
+
+      - name: Upload to TikTok
+        env:
+          TIKTOK_CLIENT_KEY: ${{ secrets.TIKTOK_CLIENT_KEY }}
+          TIKTOK_CLIENT_SECRET: ${{ secrets.TIKTOK_CLIENT_SECRET }}
+        run: python tiktok_uploader.py
+
+      - name: Keep-alive (Update Token)
+        if: always()
+        run: |
+          # If the tiktok_tokens.json was updated, we should ideally save it back to Secrets.
+          # Since we can't easily update Secrets from an Action, we will print it as a reminder 
+          # or the script itself handles the refresh and we just hope the refresh token lives 1 year.
+          echo "Process finished."
