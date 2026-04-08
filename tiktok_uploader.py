@@ -61,6 +61,12 @@ def upload_video(video_path, caption, hashtags):
     # Combine caption and hashtags
     full_title = f"{caption}\n\n{hashtags}"
     
+    # TikTok requires chunk_size to be at least 5MB (5242880 bytes).
+    # If the video is smaller than 5MB, we still say chunk_size is 5MB, 
+    # but the actual file uploaded is smaller.
+    video_size = os.path.getsize(video_path)
+    chunk_size = max(5242880, video_size) 
+    
     data = {
         "post_info": {
             "title": full_title[:2000],  # TikTok limit is around 2000-4000
@@ -69,8 +75,8 @@ def upload_video(video_path, caption, hashtags):
         },
         "source_info": {
             "source": "FILE_UPLOAD",
-            "video_size": os.path.getsize(video_path),
-            "chunk_size": os.path.getsize(video_path),
+            "video_size": video_size,
+            "chunk_size": chunk_size,
             "total_chunk_count": 1
         }
     }
