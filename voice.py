@@ -6,7 +6,7 @@ from config import ELEVEN_API_KEYS
 
 # Voice settings
 VOICE_ID = "XrExE9yKIg1WjnnlVkGX" # ElevenLabs Matilda
-FREE_VOICE = "en-US-AvaMultilingualNeural" # New Free TTS Voice
+FREE_VOICE = "en-US-EmmaMultilingualNeural" # Natural Female Voice
 FREE_TTS_URL = "https://tts.travisvn.com/v1/audio/speech"
 
 def generate_voice(scene_text, index):
@@ -25,7 +25,8 @@ def generate_voice(scene_text, index):
             json={
                 "model": "tts-1",
                 "voice": FREE_VOICE,
-                "input": scene_text
+                "input": scene_text,
+                "speed": 0.9 # Slow down for better clarity
             },
             timeout=60
         )
@@ -94,7 +95,8 @@ def generate_full_voice(full_text):
             json={
                 "model": "tts-1",
                 "voice": FREE_VOICE,
-                "input": full_text
+                "input": full_text,
+                "speed": 0.9 # Slow down for better clarity
             },
             timeout=120
         )

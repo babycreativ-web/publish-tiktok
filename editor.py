@@ -112,6 +112,21 @@ def build_video(clips, custom_audio_path=None, captions=None):
     # If we have a single master audio track, use it!
     if custom_audio_path and os.path.exists(custom_audio_path):
         audio = AudioFileClip(custom_audio_path)
+        
+        # 🛠️ Fix Black Screen: If audio is longer than visuals, extend the visuals
+        if audio.duration > final.duration:
+            print(f"   [FIX] Extending visuals to match audio... ({final.duration:.2f}s -> {audio.duration:.2f}s)")
+            # Re-concatenating with an extended last clip to fill the gap
+            gap = audio.duration - final.duration
+            last_clip_extended = clips[-1].fx(vfx.loop, duration=clips[-1].duration + gap)
+            final = concatenate_videoclips(clips[:-1] + [last_clip_extended], method="compose")
+            
+            # Re-apply captions if they were already merged into 'final'
+            # (In our logic, captions are merged into 'final' BEFORE this block, so we need to re-overlay them if they exist)
+            if captions:
+                # Re-overlaying captions on the new extended visuals
+                final = CompositeVideoClip([final] + text_clips)
+
         final = final.set_audio(audio)
 
     # Background music
