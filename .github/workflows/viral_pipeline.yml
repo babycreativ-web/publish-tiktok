@@ -1,17 +1,14 @@
 name: Viral Video Pipeline
 
-# on:
-#   schedule:
-#     # 10 AM ET (14:00 UTC)
-#     - cron: '0 14 * * *'
-#     # 3 PM ET (19:00 UTC)
-#     - cron: '0 19 * * *'
-#     # 9 PM ET (01:00 UTC next day)
-#     - cron: '0 1 * * *'
-#   workflow_dispatch: # Allows manual trigger
-
 on:
-  workflow_dispatch: # Allows manual trigger only
+  schedule:
+    # 10 AM ET (14:00 UTC)
+    - cron: '0 14 * * *'
+    # 3 PM ET (19:00 UTC)
+    - cron: '0 19 * * *'
+    # 9 PM ET (01:00 UTC next day)
+    - cron: '0 1 * * *'
+  workflow_dispatch: # Allows manual trigger
 
 jobs:
   build-and-post:
@@ -41,10 +38,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Create TikTok Token File
-        run: |
-          echo '${{ secrets.TIKTOK_TOKENS_JSON }}' > tiktok_tokens.json
-
       - name: Run Video Generation
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
@@ -54,8 +47,6 @@ jobs:
           GEMINI_API_KEY_BACKUP: ${{ secrets.GEMINI_API_KEY_BACKUP }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           COHERE_API_KEY: ${{ secrets.COHERE_API_KEY }}
-          TIKTOK_CLIENT_KEY: ${{ secrets.TIKTOK_CLIENT_KEY }}
-          TIKTOK_CLIENT_SECRET: ${{ secrets.TIKTOK_CLIENT_SECRET }}
         run: python main.py
 
       - name: Run YouTube Upload
