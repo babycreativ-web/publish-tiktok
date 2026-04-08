@@ -30,10 +30,10 @@ Rules:
     print(f"   [AI] Generated {len(scenes)} scenes.")
     return scenes
 
-def get_keywords(scene):
-    prompt = f"Give 2 keywords (only the 2 words, separated by space) for a stock video matching this scene: {scene}"
+def get_visual_query(scene, theme="cinematic storytelling"):
+    prompt = f"Create a 4-to-7 word descriptive search query for a high-quality vertical stock video matching this scene: '{scene}'. The visual style should be: {theme}. Output ONLY the search query text."
     text = safe_generate_text(prompt)
-    return text.strip()
+    return text.strip().replace('"', '')
 
 def generate_metadata(story_text):
     print("   [AI] Generating viral caption and hashtags...")

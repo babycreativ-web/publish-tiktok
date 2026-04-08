@@ -1,5 +1,5 @@
 import os
-from story import generate_story, get_keywords, generate_metadata
+from story import generate_story, get_visual_query, generate_metadata
 from voice import generate_voice, generate_full_voice
 from video_fetcher import download_video
 from editor import create_clip, build_video, create_synced_video_clip
@@ -49,12 +49,12 @@ def run():
 
             tqdm.write(f"\n Scene {i+1}: {text} ({duration:.2f}s)")
             
-            # 2. Keywords & Download
-            keywords = get_keywords(text)
-            video_path = download_video(keywords, i, text)
+            # 2. Visual Prompt & Download
+            visual_query = get_visual_query(text)
+            video_path = download_video(visual_query, i, text)
 
             if not video_path:
-                tqdm.write(f"   [WARN] No video found for: {keywords}")
+                tqdm.write(f"   [WARN] No visual found for: {visual_query}")
                 continue
 
             # 3. Create Synced Clip (Visuals only, captions overlaid later in build_video)

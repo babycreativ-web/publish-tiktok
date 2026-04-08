@@ -11,7 +11,7 @@ else:
 
 from moviepy.editor import (
     VideoFileClip, TextClip, CompositeVideoClip,
-    concatenate_videoclips, AudioFileClip, CompositeAudioClip, vfx
+    concatenate_videoclips, AudioFileClip, CompositeAudioClip, ImageClip, vfx
 )
 from config import RESOLUTION
 
@@ -58,7 +58,22 @@ def create_clip(video_path, text, voice_path, is_hook=False):
     return final.fadein(0.2).fadeout(0.2)
 
 def create_synced_video_clip(video_path, duration):
-    # Subclip the video matching the required duration
+    # Support for AI-generated images
+    if video_path.lower().endswith(('.jpg', '.jpeg', '.png')):
+        # Create an image clip
+        clip = ImageClip(video_path).set_duration(duration)
+        clip = clip.resize(width=RESOLUTION[0] * 1.2) # Start slightly larger for zoom
+        
+        # Subtle "Ken Burns" Zoom Effect
+        # Resizes the image slowly from 1.2x to 1.1x over the duration
+        clip = clip.resize(lambda t: 1.2 - 0.1 * (t/duration))
+        clip = clip.set_position(('center', 'center'))
+        
+        # Crop to final resolution
+        clip = clip.crop(x_center=clip.w/2, y_center=clip.h/2, width=RESOLUTION[0], height=RESOLUTION[1])
+        return clip.fadein(0.2).fadeout(0.2)
+
+    # Standard Video Logic
     clip_vid = VideoFileClip(video_path)
     if clip_vid.duration < duration:
         # Loop it if it's too short
@@ -69,7 +84,7 @@ def create_synced_video_clip(video_path, duration):
         clip_vid = clip_vid.subclip(0, duration)
         
     clip = clip_vid.resize(RESOLUTION)
-    return clip.fadein(0.1).fadeout(0.1)
+    return clip.fadein(0.2).fadeout(0.2)
 
 def build_video(clips, custom_audio_path=None, captions=None):
     import os
