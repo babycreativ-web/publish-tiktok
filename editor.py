@@ -33,11 +33,16 @@ def create_clip(video_path, text, voice_path, is_hook=False):
     fontsize = 130 if is_hook else 100
     color = 'yellow' if is_hook else 'white'
 
+    # Check if Anton font is available, else fallback to Impact
+    font_path = 'assets/Anton-Regular.ttf' if os.path.exists('assets/Anton-Regular.ttf') else 'Impact'
+
     txt = TextClip(
         text,
         fontsize=fontsize,
         color=color,
-        font='Impact',
+        font=font_path,
+        stroke_color='black',
+        stroke_width=3,
         method='caption',
         size=(1000, None),
         align='center'
@@ -75,6 +80,7 @@ def build_video(clips, custom_audio_path=None, captions=None):
     # Overlay dynamic captions if provided
     if captions:
         text_clips = []
+        font_path = 'assets/Anton-Regular.ttf' if os.path.exists('assets/Anton-Regular.ttf') else 'Impact'
         for i, cap in enumerate(captions):
             # First caption is a hook
             fontsize = 130 if i == 0 else 100
@@ -88,7 +94,9 @@ def build_video(clips, custom_audio_path=None, captions=None):
                 cap["text"],
                 fontsize=fontsize,
                 color=color,
-                font='Impact',
+                font=font_path,
+                stroke_color='black',
+                stroke_width=3,
                 method='caption',
                 size=(1000, None),
                 align='center'

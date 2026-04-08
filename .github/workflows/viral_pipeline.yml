@@ -1,14 +1,17 @@
 name: Viral Video Pipeline
 
+# on:
+#   schedule:
+#     # 10 AM ET (14:00 UTC)
+#     - cron: '0 14 * * *'
+#     # 3 PM ET (19:00 UTC)
+#     - cron: '0 19 * * *'
+#     # 9 PM ET (01:00 UTC next day)
+#     - cron: '0 1 * * *'
+#   workflow_dispatch: # Allows manual trigger
+
 on:
-  schedule:
-    # 10 AM ET (14:00 UTC)
-    - cron: '0 14 * * *'
-    # 3 PM ET (19:00 UTC)
-    - cron: '0 19 * * *'
-    # 9 PM ET (01:00 UTC next day)
-    - cron: '0 1 * * *'
-  workflow_dispatch: # Allows manual trigger
+  workflow_dispatch: # Allows manual trigger only
 
 jobs:
   build-and-post:
