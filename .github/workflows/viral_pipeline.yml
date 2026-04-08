@@ -31,6 +31,7 @@ jobs:
           sudo apt-get install -y ffmpeg imagemagick
           # Fix ImageMagick security policy to allow TextClip
           sudo sed -i 's/domain="coder" rights="none" pattern="LABEL"/domain="coder" rights="read|write" pattern="LABEL"/' /etc/ImageMagick-6/policy.xml || true
+          sudo sed -i '/pattern="@\*"/d' /etc/ImageMagick-6/policy.xml || true
 
       - name: Install Python Dependencies
         run: |
