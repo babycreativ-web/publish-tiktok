@@ -8,3 +8,5 @@ cohere==5.9.1
 tqdm==4.66.1
 g4f==0.3.3.0
 openai==1.45.0
+Pillow==9.5.0
+numpy<2.0.0
