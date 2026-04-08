@@ -74,18 +74,22 @@ jobs:
               f.write('🏷️ HASHTAGS:\n')
               f.write(meta.get('hashtags', 'N/A') + '\n\n')
               f.write('📋 HOW TO POST:\n')
-              f.write('1. Download this ZIP\n')
+              f.write('1. Download and extract this ZIP\n')
               f.write('2. Open TikTok and tap + (new video)\n')
               f.write('3. Upload video.mp4\n')
               f.write('4. Paste the caption + hashtags\n')
               f.write('5. Post!\n')
             "
           fi
+          
+          # Manually zip the files to ensure the downloaded file has a .zip extension
+          cd ready_to_post
+          zip -r ../tiktok_video_${{ github.run_number }}.zip ./*
 
       - name: 📦 Upload Artifact (Download Your Video Here!)
         uses: actions/upload-artifact@v4
-        if: always()
+        if: success()
         with:
-          name: tiktok-video-${{ github.run_number }}
-          path: ready_to_post/
+          name: tiktok_video_${{ github.run_number }}.zip
+          path: tiktok_video_${{ github.run_number }}.zip
           retention-days: 7
