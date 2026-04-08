@@ -16,21 +16,28 @@ def generate_voice(scene_text, index):
         print(f"   🔊 Found manual voice file: {path} — skipping generation.")
         return path
 
-    audio = client.text_to_speech.convert(
-        voice_id=VOICE_ID,
-        model_id="eleven_multilingual_v2",
-        text=scene_text,
-        voice_settings=VoiceSettings(
-            stability=0.38,
-            similarity_boost=0.80,
-            style=0.35,
-            use_speaker_boost=True,
-            speed=0.92
+    try:
+        audio = client.text_to_speech.convert(
+            voice_id=VOICE_ID,
+            model_id="eleven_multilingual_v2",
+            text=scene_text,
+            voice_settings=VoiceSettings(
+                stability=0.38,
+                similarity_boost=0.80,
+                style=0.35,
+                use_speaker_boost=True,
+                speed=0.92
+            )
         )
-    )
 
-    with open(path, "wb") as f:
-        for chunk in audio:
-            f.write(chunk)
+        with open(path, "wb") as f:
+            for chunk in audio:
+                f.write(chunk)
+    except Exception as e:
+        print(f"   ⚠️ ElevenLabs Error (Quota?): {e}")
+        print("   🔄 Falling back to Google TTS (gTTS)...")
+        from gtts import gTTS
+        tts = gTTS(text=scene_text, lang='en', slow=False)
+        tts.save(path)
 
     return path
