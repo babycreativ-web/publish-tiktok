@@ -61,15 +61,21 @@ def upload_video(video_path, caption, hashtags):
     # Combine caption and hashtags
     full_title = f"{caption}\n\n{hashtags}"
     
-    # TikTok requires chunk_size to be at least 5MB (5242880 bytes).
-    # If the video is smaller than 5MB, we still say chunk_size is 5MB, 
-    # but the actual file uploaded is smaller.
     video_size = os.path.getsize(video_path)
-    chunk_size = max(5242880, video_size) 
+    
+    # TikTok Chunking Rules:
+    # chunk_size must be >= 5MB and <= 64MB
+    if video_size < 5242880:
+        chunk_size = video_size
+        total_chunk_count = 1
+    else:
+        chunk_size = 27642880  # ~27.6MB standard chunk size
+        # TikTok expects total_chunk_count = floor(video_size / chunk_size)
+        total_chunk_count = max(1, video_size // chunk_size)
     
     data = {
         "post_info": {
-            "title": full_title[:2000],  # TikTok limit is around 2000-4000
+            "title": full_title[:2000],  # TikTok limit is around 2000
             "privacy_level": "SELF_ONLY", # PRIVATE
             "video_cover_timestamp_ms": 1000
         },
@@ -77,7 +83,7 @@ def upload_video(video_path, caption, hashtags):
             "source": "FILE_UPLOAD",
             "video_size": video_size,
             "chunk_size": chunk_size,
-            "total_chunk_count": 1
+            "total_chunk_count": total_chunk_count
         }
     }
 
@@ -97,21 +103,36 @@ def upload_video(video_path, caption, hashtags):
     upload_url = init_data["upload_url"]
     publish_id = init_data["publish_id"]
 
-    # 2. Upload File
+    # 2. Upload File (Multi-part Chunking)
     print(f"📁 Content uploading to {upload_url[:50]}...")
+    
     with open(video_path, "rb") as f:
-        headers = {
-            "Content-Type": "video/mp4",
-            "Content-Range": f"bytes 0-{os.path.getsize(video_path)-1}/{os.path.getsize(video_path)}"
-        }
-        res = requests.put(upload_url, headers=headers, data=f)
+        for i in range(total_chunk_count):
+            is_last = (i == total_chunk_count - 1)
+            start_byte = i * chunk_size
+            
+            if is_last:
+                # Read all remaining bytes for the final chunk
+                chunk_data = f.read()
+                end_byte = video_size - 1
+            else:
+                chunk_data = f.read(chunk_size)
+                end_byte = start_byte + chunk_size - 1
+                
+            headers = {
+                "Content-Type": "video/mp4",
+                "Content-Range": f"bytes {start_byte}-{end_byte}/{video_size}"
+            }
+            
+            print(f"   ⬆️ Uploading chunk {i+1}/{total_chunk_count} ({len(chunk_data)} bytes)...")
+            res = requests.put(upload_url, headers=headers, data=chunk_data)
+            
+            if res.status_code not in [200, 201]:
+                print(f"❌ Upload failed on chunk {i+1}: {res.text}")
+                return False
 
-    if res.status_code in [200, 201]:
-        print(f"✅ Upload successful! Publish ID: {publish_id}")
-        return True
-    else:
-        print(f"❌ Upload failed: {res.text}")
-        return False
+    print(f"✅ Upload successful! Publish ID: {publish_id}")
+    return True
 
 if __name__ == "__main__":
     # Load metadata
