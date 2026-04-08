@@ -1,10 +1,13 @@
 import os
+import requests
 from elevenlabs.client import ElevenLabs
 from elevenlabs import VoiceSettings
 from config import ELEVEN_API_KEYS
 
-# Voice: Matilda
-VOICE_ID = "XrExE9yKIg1WjnnlVkGX" 
+# Voice settings
+VOICE_ID = "XrExE9yKIg1WjnnlVkGX" # ElevenLabs Matilda
+FREE_VOICE = "en-US-AvaMultilingualNeural" # New Free TTS Voice
+FREE_TTS_URL = "https://tts.travisvn.com/v1/audio/speech"
 
 def generate_voice(scene_text, index):
     path = f"temp/voice_{index}.mp3"
@@ -14,7 +17,29 @@ def generate_voice(scene_text, index):
         print(f"   🔊 Found manual voice file: {path} — skipping generation.")
         return path
 
-    # Try every ElevenLabs key in the rotation list
+    # 1. Try New Free TTS first
+    try:
+        print(f"   🎤 Trying New Free TTS (Ava)...")
+        res = requests.post(
+            FREE_TTS_URL,
+            json={
+                "model": "tts-1",
+                "voice": FREE_VOICE,
+                "input": scene_text
+            },
+            timeout=60
+        )
+        if res.status_code == 200:
+            with open(path, "wb") as f:
+                f.write(res.content)
+            print("   ✅ Free TTS generated successfully!")
+            return path
+        else:
+            print(f"   ⚠️ Free TTS failed with status {res.status_code}")
+    except Exception as e:
+        print(f"   ⚠️ Free TTS error: {e}")
+
+    # 2. Fallback to ElevenLabs
     for i, api_key in enumerate(ELEVEN_API_KEYS):
         try:
             print(f"   🎤 Trying ElevenLabs Key {i+1}...")
@@ -61,7 +86,29 @@ def generate_full_voice(full_text):
 
     print("   [VOICE] Generating single master audio track for the entire story...")
     
-    # Try every ElevenLabs key in the rotation list
+    # 1. Try New Free TTS first
+    try:
+        print(f"   🎤 Trying New Free TTS (Ava)...")
+        res = requests.post(
+            FREE_TTS_URL,
+            json={
+                "model": "tts-1",
+                "voice": FREE_VOICE,
+                "input": full_text
+            },
+            timeout=120
+        )
+        if res.status_code == 200:
+            with open(path, "wb") as f:
+                f.write(res.content)
+            print("   ✅ Free Master Audio generated successfully!")
+            return path
+        else:
+            print(f"   ⚠️ Free TTS failed with status {res.status_code}")
+    except Exception as e:
+        print(f"   ⚠️ Free TTS error: {e}")
+
+    # 2. Fallback to ElevenLabs
     for i, api_key in enumerate(ELEVEN_API_KEYS):
         try:
             print(f"   🎤 Trying ElevenLabs Key {i+1}...")

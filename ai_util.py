@@ -129,13 +129,14 @@ def call_openai(prompt):
     return res.choices[0].message.content
 
 # Providers List Ordered by Priority
-# G4F is always first — free, no key needed
-providers = [{"name": "G4F Free AI (PollinationsAI)", "func": call_g4f}]
+# Prioritize stable APIs with keys first. Move G4F (free/unstable) to the bottom.
+providers = []
 if GROQ_API_KEY: providers.append({"name": "Groq (Llama-3)", "func": call_groq})
-if COHERE_API_KEY: providers.append({"name": "Cohere (Command)", "func": call_cohere})
-if GEMINI_API_KEY: providers.append({"name": "Gemini 1.5 Flash", "func": call_gemini_1})
-if GEMINI_API_KEY_BACKUP: providers.append({"name": "Gemini 1.5 Backup", "func": call_gemini_backup})
+if GEMINI_API_KEY: providers.append({"name": "Gemini 2.0 Flash", "func": call_gemini_1})
+if GEMINI_API_KEY_BACKUP: providers.append({"name": "Gemini 2.0 Backup", "func": call_gemini_backup})
 if OPENAI_API_KEY: providers.append({"name": "OpenAI (GPT-4o-mini)", "func": call_openai})
+if COHERE_API_KEY: providers.append({"name": "Cohere (Command)", "func": call_cohere})
+providers.append({"name": "G4F Free AI (PollinationsAI)", "func": call_g4f})
 
 current_provider_idx = 0
 
@@ -151,7 +152,22 @@ def safe_generate_text(prompt):
             # Attempt to generate content using the current active provider
             print(f"    [AI] Querying {provider['name']}...")
             text = provider["func"](prompt)
+            
             if text and text.strip():
+                # Check for common error signatures that "G4F" or broken proxies might return as raw strings
+                lower_text = text.lower()
+                error_signatures = [
+                    "authentication error", "insufficient_balance", "quota_exceeded", 
+                    "no api key passed in", "bad gateway", "internal server error", 
+                    "invalid_request_error", "rate_limit_exceeded"
+                ]
+                
+                is_error = any(sig in lower_text for sig in error_signatures)
+                if is_error:
+                    print(f"    [WARN] Detected error message in AI response from {provider['name']}. Skipping...")
+                    current_provider_idx += 1
+                    continue
+                    
                 return text
             else:
                 raise Exception("Empty response returned.")
