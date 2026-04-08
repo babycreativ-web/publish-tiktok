@@ -1,4 +1,5 @@
 import time
+import httpx
 from config import (
     GROQ_API_KEY, COHERE_API_KEY, 
     GEMINI_API_KEY, GEMINI_API_KEY_BACKUP, 
@@ -9,9 +10,10 @@ from config import (
 def call_g4f(prompt):
     from g4f.client import Client
     import g4f
-    client = Client(provider=g4f.Provider.PollinationsAI)
+    # Use auto provider selection to avoid attribute errors
+    client = Client()
     r = client.chat.completions.create(
-        model="openai",
+        model="gpt-4o",  # Updated to a more standard model name
         messages=[{"role": "user", "content": prompt}],
         timeout=30
     )
@@ -20,9 +22,11 @@ def call_g4f(prompt):
 # 1. Groq Setup
 def call_groq(prompt):
     from groq import Groq
-    client = Groq(api_key=GROQ_API_KEY)
+    # Explicitly use a clean httpx Client to avoid proxy issues on GitHub runners
+    http_client = httpx.Client(proxies={})
+    client = Groq(api_key=GROQ_API_KEY, http_client=http_client)
     res = client.chat.completions.create(
-        model="llama-3.1-8b-instant",  # Updated from decommissioned llama3-8b-8192
+        model="llama-3.1-8b-instant",
         messages=[{"role": "user", "content": prompt}],
         temperature=0.7
     )
@@ -35,7 +39,9 @@ def get_whisper_sync_data(audio_path):
     
     print(f"    [AI] Analyzing audio with Groq Whisper for perfect sync: {audio_path}...")
     
-    client = Groq(api_key=GROQ_API_KEY)
+    # Explicitly use a clean httpx Client to avoid proxy issues on GitHub runners
+    http_client = httpx.Client(proxies={})
+    client = Groq(api_key=GROQ_API_KEY, http_client=http_client)
     
     if not os.path.exists(audio_path):
         raise FileNotFoundError(f"Audio file not found: {audio_path}")
