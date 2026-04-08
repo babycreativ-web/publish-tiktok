@@ -3,8 +3,11 @@ import os
 if os.name == 'nt':
     os.environ["IMAGEMAGICK_BINARY"] = r"C:\Program Files\ImageMagick-7.1.2-Q16-HDRI\magick.exe"
 else:
-    # On Linux/GitHub Actions, it's usually just 'convert' or 'magick' in the PATH
-    os.environ["IMAGEMAGICK_BINARY"] = "/usr/bin/magick"
+    # On Linux/GitHub Actions, it's usually 'magick' (v7) or 'convert' (v6)
+    if os.path.exists("/usr/bin/magick"):
+        os.environ["IMAGEMAGICK_BINARY"] = "/usr/bin/magick"
+    else:
+        os.environ["IMAGEMAGICK_BINARY"] = "/usr/bin/convert"
 
 from moviepy.editor import (
     VideoFileClip, TextClip, CompositeVideoClip,
