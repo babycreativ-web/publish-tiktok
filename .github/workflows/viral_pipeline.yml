@@ -38,6 +38,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Install Playwright Browsers
+        run: npx playwright install chromium --with-deps
+
       - name: Run Video Generation
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
@@ -55,6 +58,15 @@ jobs:
           YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
           YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
         run: python youtube_uploader.py
+
+      - name: Run TikTok Stealth Upload
+        env:
+          TIKTOK_COOKIES: ${{ secrets.TIKTOK_COOKIES }}
+        run: |
+          echo "$TIKTOK_COOKIES" > tiktok_cookies.json
+          # Extract caption/hashtags from metadata.json safely
+          CAPTION=$(python3 -c "import json; print(json.load(open('temp/metadata.json'))['caption'])")
+          python tiktok_stealth_uploader.py --video output/final.mp4 --caption "$CAPTION"
 
       - name: Package Video & Metadata for Download
         if: always()
