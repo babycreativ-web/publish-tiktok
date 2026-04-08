@@ -55,16 +55,37 @@ jobs:
           TIKTOK_CLIENT_SECRET: ${{ secrets.TIKTOK_CLIENT_SECRET }}
         run: python main.py
 
-      - name: Upload to TikTok
-        env:
-          TIKTOK_CLIENT_KEY: ${{ secrets.TIKTOK_CLIENT_KEY }}
-          TIKTOK_CLIENT_SECRET: ${{ secrets.TIKTOK_CLIENT_SECRET }}
-        run: python tiktok_uploader.py
-
-      - name: Keep-alive (Update Token)
+      - name: Package Video & Metadata for Download
         if: always()
         run: |
-          # If the tiktok_tokens.json was updated, we should ideally save it back to Secrets.
-          # Since we can't easily update Secrets from an Action, we will print it as a reminder 
-          # or the script itself handles the refresh and we just hope the refresh token lives 1 year.
-          echo "Process finished."
+          mkdir -p ready_to_post
+          # Copy the generated video
+          cp output/final.mp4 ready_to_post/video.mp4 || true
+          # Create a handy post guide with caption and hashtags
+          if [ -f temp/metadata.json ]; then
+            python3 -c "
+          import json
+          with open('temp/metadata.json') as f:
+              meta = json.load(f)
+          with open('ready_to_post/POST_GUIDE.txt', 'w') as f:
+              f.write('=== YOUR TIKTOK POST GUIDE ===\n\n')
+              f.write('📌 CAPTION:\n')
+              f.write(meta.get('caption', 'N/A') + '\n\n')
+              f.write('🏷️ HASHTAGS:\n')
+              f.write(meta.get('hashtags', 'N/A') + '\n\n')
+              f.write('📋 HOW TO POST:\n')
+              f.write('1. Download this ZIP\n')
+              f.write('2. Open TikTok and tap + (new video)\n')
+              f.write('3. Upload video.mp4\n')
+              f.write('4. Paste the caption + hashtags\n')
+              f.write('5. Post!\n')
+            "
+          fi
+
+      - name: 📦 Upload Artifact (Download Your Video Here!)
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: tiktok-video-${{ github.run_number }}
+          path: ready_to_post/
+          retention-days: 7
