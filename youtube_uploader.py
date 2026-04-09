@@ -6,27 +6,32 @@ from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
 from googleapiclient.errors import HttpError
 
-# 🛠️ LOAD SECRETS FROM ENVIRONMENT
-CLIENT_ID = os.environ.get("YOUTUBE_CLIENT_ID")
-CLIENT_SECRET = os.environ.get("YOUTUBE_CLIENT_SECRET")
-REFRESH_TOKEN = os.environ.get("YOUTUBE_REFRESH_TOKEN")
+from config import get_token, load_channel_config
 
-def get_youtube_client():
-    if not all([CLIENT_ID, CLIENT_SECRET, REFRESH_TOKEN]):
-        print("❌ YouTube credentials missing in environment variables.")
+# 🛠️ GLOBALS (Will be updated in main block or via function calls)
+def get_youtube_client(suffix=""):
+    client_id = get_token("YOUTUBE_CLIENT_ID", suffix)
+    client_secret = get_token("YOUTUBE_CLIENT_SECRET", suffix)
+    refresh_token = get_token("YOUTUBE_REFRESH_TOKEN", suffix)
+
+    if not all([client_id, client_secret, refresh_token]):
+        print(f"❌ YouTube credentials missing for suffix '{suffix}'.")
         return None
 
     credentials = google.oauth2.credentials.Credentials(
         None,
-        refresh_token=REFRESH_TOKEN,
+        refresh_token=refresh_token,
         token_uri="https://oauth2.googleapis.com/token",
-        client_id=CLIENT_ID,
-        client_secret=CLIENT_SECRET,
+        client_id=client_id,
+        client_secret=client_secret,
     )
     return build("youtube", "v3", credentials=credentials)
 
-def upload_short(video_path, title, description):
-    youtube = get_youtube_client()
+def upload_short(video_path, title, description, channel_id="oracle_feed"):
+    chan_config = load_channel_config(channel_id)
+    suffix = chan_config.get("env_suffix", "") if chan_config else ""
+    
+    youtube = get_youtube_client(suffix)
     if not youtube:
         return False
 
@@ -71,7 +76,22 @@ def upload_short(video_path, title, description):
             if status:
                 print(f"   ⬆️ Uploading... {int(status.progress() * 100)}%")
         
-        print(f"✅ YouTube Upload Successful! Video ID: {response.get('id')}")
+        video_id = response.get('id')
+        print(f"✅ YouTube Upload Successful! Video ID: {video_id}")
+        
+        # Save the video ID to the specific channel's history
+        history_file = os.path.join("db", channel_id, "history.json")
+        if os.path.exists(history_file):
+            try:
+                with open(history_file, 'r') as f:
+                    history = json.load(f)
+                if len(history) > 0:
+                    history[-1]['youtube_video_id'] = video_id
+                    with open(history_file, 'w') as f:
+                        json.dump(history, f, indent=4)
+            except Exception as e:
+                print(f"⚠️ Error updating history with video ID: {e}")
+
         return True
 
     except HttpError as e:
@@ -82,6 +102,13 @@ def upload_short(video_path, title, description):
         return False
 
 if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--channel", type=str, help="Channel ID to run")
+    args = parser.parse_args()
+    
+    channel_id = args.channel or "oracle_feed"
+
     # Load metadata
     metadata_path = "temp/metadata.json"
     video_path = "output/final.mp4"
@@ -91,8 +118,8 @@ if __name__ == "__main__":
             meta = json.load(f)
         
         # In Shorts, the caption works as the Title
-        success = upload_short(video_path, meta["caption"], meta["hashtags"])
+        success = upload_short(video_path, meta["caption"], meta["hashtags"], channel_id=channel_id)
         if success:
-            print("🎉 Video is live on YouTube Shorts!")
+            print(f"🎉 Video is live on YouTube Shorts for channel {channel_id}!")
     else:
         print("❌ Metadata or Video file missing for YouTube upload.")

@@ -18,3 +18,45 @@ RESOLUTION = (1080, 1920)
 # TikTok API
 TIKTOK_CLIENT_KEY = os.getenv("TIKTOK_CLIENT_KEY")
 TIKTOK_CLIENT_SECRET = os.getenv("TIKTOK_CLIENT_SECRET")
+
+# --- A/B TESTING & OPTIMIZATION ---
+RANDOMIZE_TEST = True
+ANALYSIS_INTERVAL_DAYS = 5
+
+TEST_NICHES = [
+    "Horror Stories",
+    "Dark Fantasy",
+    "Unsolved Crimes",
+    "Shocking Truths",
+    "Existential Suspense"
+]
+
+# Voice Testing (A/B testing for the best performance)
+TEST_VOICES = [
+    "onyx",      # Deep, resonant, mysterious (BEST for horror/mystery)
+    "fable",     # Narrative, expressive storytelling
+    "echo",      # Mature, calm, authoritative
+    "shimmer",   # Clear, soulful, emotive
+    "en-US-EmmaMultilingualNeural" # High-quality neutral female
+]
+
+# --- MULTI-CHANNEL HELPERS ---
+def load_channel_config(channel_id):
+    if not channel_id:
+        return None
+    config_path = os.path.join("channels", f"{channel_id}.json")
+    if os.path.exists(config_path):
+        import json
+        with open(config_path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return None
+
+def get_token(base_key, suffix=""):
+    """Helper to get suffixed secrets with fallback to original"""
+    key = f"{base_key}{suffix}" if suffix else base_key
+    val = os.getenv(key)
+    if not val and suffix:
+        # Fallback to the base key if suffix not found
+        val = os.getenv(base_key)
+    return val
+

@@ -1,33 +1,39 @@
 import os
 from ai_util import safe_generate_text
 
-def generate_story():
-    # 📝 Optional Manual Override: Rename story.txt.override to story.txt to skip AI generation
+def generate_story(niche="viral storytelling"):
+    # 📝 Optional Manual Override
     if os.path.exists("story.txt"):
-        print("   [MANUAL] Detected story.txt — using it as manual override (delete it to use AI generation).")
+        print("   [MANUAL] Detected story.txt — using it as manual override.")
         with open("story.txt", "r", encoding="utf-8") as f:
             scenes = [line.strip() for line in f if line.strip()]
         if scenes:
             return scenes
 
-    print("   [AI] Auto-generating story with free AI (PollinationsAI)...")
-    prompt = """
-Create a viral short story for a cohesive, captivating short video.
+    print(f"   [AI] Auto-generating {niche} story with free AI...")
+    prompt = f"""
+Create a highly viral {niche} short story for TikTok/YouTube Shorts. 
+It must be a "Plot Twist", "Psychological", "Creepy/Mystery", or "Success/Regret" story within the {niche} genre.
 
-Rules:
-- Must be EXACTLY between 150 to 170 words total in length.
-- Break it into EXACTLY 13 to 15 scenes (each scene on a new line).
-- Each scene is one punchy, vivid sentence.
-- The very first scene must be a shocking, irresistible hook.
-- The last scene must be a jaw-dropping twist or shocking reveal.
+Formulas & Rules:
+- Length: EXACTLY 40 to 60 words (crucial for 10-25 second duration).
+- Structure: EXACTLY 5 to 6 scenes (each scene on a new line).
+- Hook (Scene 1): A shocking, irresistible curiosity or suspense hook (e.g., "A man skipped work one day... and it saved his life.")
+- Build Tension (Scenes 2-4): Calmly narrate the events escalating.
+- Twist (Last Scene): A jaw-dropping twist or shocking reveal.
+- Loop Trick: The ending MUST connect perfectly back to the first scene's hook so it loops seamlessly.
+- You can use these ideas as inspiration if they fit the {niche} genre:
+  - "He ignored a message... that was his biggest mistake."
+  - "A simple 'yes' changed his entire life."
+  - "He trusted his best friend... and lost everything."
 - No numbering, no blank lines, no labels — just the scenes.
-- Make it feel viral, emotional, or deeply surprising.
+- Make it dark, mysterious, or deeply surprising.
 """
 
     text = safe_generate_text(prompt)
     scenes = text.strip().split("\n")
     scenes = [s.strip() for s in scenes if s.strip()]
-    print(f"   [AI] Generated {len(scenes)} scenes.")
+    print(f"   [AI] Generated {len(scenes)} scenes in the '{niche}' niche.")
     return scenes
 
 def get_visual_query(scene, theme="cinematic storytelling"):

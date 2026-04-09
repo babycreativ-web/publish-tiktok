@@ -1,3 +1,5 @@
+import warnings
+warnings.filterwarnings("ignore")
 import google.generativeai as genai
 from config import GEMINI_API_KEY, GEMINI_API_KEY_BACKUP
 import time

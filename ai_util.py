@@ -1,12 +1,26 @@
 import time
-import httpx
+import requests
 from config import (
     GROQ_API_KEY, COHERE_API_KEY, 
     GEMINI_API_KEY, GEMINI_API_KEY_BACKUP, 
     OPENAI_API_KEY
 )
 
-# 0. G4F Free AI (PollinationsAI — no API key needed)
+# ✨ #0 PRIORITY: Pollinations AI — 100% Free, Unlimited, No API Key!
+def call_pollinations(prompt):
+    """Uses Pollinations AI's OpenAI-compatible text endpoint. Completely free, no keys."""
+    url = "https://text.pollinations.ai/openai"
+    payload = {
+        "model": "mistral",  # Free model, high quality
+        "messages": [{"role": "user", "content": prompt}],
+        "temperature": 0.85,
+        "max_tokens": 1000
+    }
+    response = requests.post(url, json=payload, timeout=60)
+    response.raise_for_status()
+    return response.json()["choices"][0]["message"]["content"]
+
+
 def call_g4f(prompt):
     from g4f.client import Client
     import g4f
@@ -22,9 +36,7 @@ def call_g4f(prompt):
 # 1. Groq Setup
 def call_groq(prompt):
     from groq import Groq
-    # Explicitly use a clean httpx Client to avoid proxy issues on GitHub runners
-    http_client = httpx.Client(proxies={})
-    client = Groq(api_key=GROQ_API_KEY, http_client=http_client)
+    client = Groq(api_key=GROQ_API_KEY)
     res = client.chat.completions.create(
         model="llama-3.1-8b-instant",
         messages=[{"role": "user", "content": prompt}],
@@ -39,9 +51,7 @@ def get_whisper_sync_data(audio_path):
     
     print(f"    [AI] Analyzing audio with Groq Whisper for perfect sync: {audio_path}...")
     
-    # Explicitly use a clean httpx Client to avoid proxy issues on GitHub runners
-    http_client = httpx.Client(proxies={})
-    client = Groq(api_key=GROQ_API_KEY, http_client=http_client)
+    client = Groq(api_key=GROQ_API_KEY)
     
     if not os.path.exists(audio_path):
         raise FileNotFoundError(f"Audio file not found: {audio_path}")
@@ -128,15 +138,16 @@ def call_openai(prompt):
     )
     return res.choices[0].message.content
 
-# Providers List Ordered by Priority
-# Prioritize stable APIs with keys first. Move G4F (free/unstable) to the bottom.
+# Providers List — Ordered by Priority
+# Pollinations is #1: Free, unlimited, no key needed. Others as backup.
 providers = []
+providers.append({"name": "Pollinations AI (Free/Unlimited)", "func": call_pollinations})
 if GROQ_API_KEY: providers.append({"name": "Groq (Llama-3)", "func": call_groq})
 if GEMINI_API_KEY: providers.append({"name": "Gemini 2.0 Flash", "func": call_gemini_1})
 if GEMINI_API_KEY_BACKUP: providers.append({"name": "Gemini 2.0 Backup", "func": call_gemini_backup})
 if OPENAI_API_KEY: providers.append({"name": "OpenAI (GPT-4o-mini)", "func": call_openai})
 if COHERE_API_KEY: providers.append({"name": "Cohere (Command)", "func": call_cohere})
-providers.append({"name": "G4F Free AI (PollinationsAI)", "func": call_g4f})
+providers.append({"name": "G4F Free AI", "func": call_g4f})
 
 current_provider_idx = 0
 
