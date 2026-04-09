@@ -40,6 +40,9 @@ TEST_VOICES = [
     "en-US-EmmaMultilingualNeural" # High-quality neutral female
 ]
 
+# Modes for visual testing
+VISUAL_MODES = ["videos", "images"]
+
 # --- MULTI-CHANNEL HELPERS ---
 def load_channel_config(channel_id):
     if not channel_id:
