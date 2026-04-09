@@ -9,8 +9,8 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 
 def get_refresh_token():
     print("\n--- YOUTUBE AUTH SETUP ---")
-    client_id = input("Enter your Client ID: ").strip()
-    client_secret = input("Enter your Client Secret: ").strip()
+    client_id = os.getenv("YOUTUBE_CLIENT_ID") or input("Enter your Client ID: ").strip()
+    client_secret = os.getenv("YOUTUBE_CLIENT_SECRET") or input("Enter your Client Secret: ").strip()
 
     CLIENT_CONFIG = {
         "installed": {

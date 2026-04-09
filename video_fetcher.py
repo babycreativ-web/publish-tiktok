@@ -10,12 +10,16 @@ def generate_ai_image(prompt, index):
     encoded_prompt = requests.utils.quote(prompt)
     url = f"https://pollinations.ai/p/{encoded_prompt}?width=1080&height=1920&seed={index}&model=flux"
     
-    path = f"temp/video_{index}.jpg" # Saved as jpg, editor will handle conversion
+    path = f"temp/video_{index}.jpg"
     try:
-        data = requests.get(url, timeout=30).content
-        with open(path, "wb") as f:
-            f.write(data)
-        return path
+        response = requests.get(url, timeout=30)
+        if response.status_code == 200 and len(response.content) > 1000:
+            with open(path, "wb") as f:
+                f.write(response.content)
+            return path
+        else:
+            print(f"  ⚠️ AI Image for scene {index} was invalid or too small.")
+            return None
     except Exception as e:
         print(f"  ❌ AI Image generation failed: {e}")
         return None

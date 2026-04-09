@@ -11,7 +11,7 @@ else:
 
 from moviepy.editor import (
     VideoFileClip, TextClip, CompositeVideoClip,
-    concatenate_videoclips, AudioFileClip, CompositeAudioClip, ImageClip, vfx
+    concatenate_videoclips, AudioFileClip, CompositeAudioClip, ImageClip, vfx, ColorClip
 )
 from config import RESOLUTION
 
@@ -58,14 +58,23 @@ def create_clip(video_path, text, voice_path, is_hook=False):
     return final.fadein(0.2).fadeout(0.2)
 
 def create_synced_video_clip(video_path, duration):
+    # Fallback for missing assets
+    if not video_path or not os.path.exists(video_path):
+        print(f"   [WARN] Missing asset: {video_path}. Using placeholder.")
+        return ColorClip(RESOLUTION, col=(30, 30, 30)).set_duration(duration).fadein(0.2).fadeout(0.2)
+
     # Support for AI-generated images
     if video_path.lower().endswith(('.jpg', '.jpeg', '.png')):
         # Create an image clip
-        clip = ImageClip(video_path).set_duration(duration)
+        try:
+            clip = ImageClip(video_path).set_duration(duration)
+        except Exception as e:
+            print(f"   [ERROR] Failed to load image {video_path}: {e}")
+            return ColorClip(RESOLUTION, col=(30, 30, 30)).set_duration(duration).fadein(0.2).fadeout(0.2)
+
         clip = clip.resize(width=RESOLUTION[0] * 1.2) # Start slightly larger for zoom
         
         # Subtle "Ken Burns" Zoom Effect
-        # Resizes the image slowly from 1.2x to 1.1x over the duration
         clip = clip.resize(lambda t: 1.2 - 0.1 * (t/duration))
         clip = clip.set_position(('center', 'center'))
         
@@ -74,7 +83,12 @@ def create_synced_video_clip(video_path, duration):
         return clip.fadein(0.2).fadeout(0.2)
 
     # Standard Video Logic
-    clip_vid = VideoFileClip(video_path)
+    try:
+        clip_vid = VideoFileClip(video_path)
+    except Exception as e:
+        print(f"   [ERROR] Failed to load video {video_path}: {e}")
+        return ColorClip(RESOLUTION, col=(30, 30, 30)).set_duration(duration).fadein(0.2).fadeout(0.2)
+
     if clip_vid.duration < duration:
         # Loop it if it's too short
         from moviepy.video.fx.all import loop
