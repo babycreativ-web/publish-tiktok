@@ -16,7 +16,7 @@ jobs:
   build-and-post:
     strategy:
       matrix:
-        channel: [oracle_feed, deep_dark_intel]
+        channel: [deep_dark_intel]
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout Code
@@ -82,16 +82,16 @@ jobs:
           git pull --rebase origin main || true
           git push origin main || echo "Push failed, retrying may be needed"
 
-      - name: Run TikTok Stealth Upload
-        # Only run TikTok for the original channel for now (as requested: "just for youtube now")
-        if: matrix.channel == 'oracle_feed'
-        env:
-          TIKTOK_COOKIES: ${{ secrets.TIKTOK_COOKIES }}
-        run: |
-          echo "$TIKTOK_COOKIES" > tiktok_cookies.json
-          # Extract caption/hashtags from metadata.json safely
-          CAPTION=$(python3 -c "import json; print(json.load(open('temp/metadata.json'))['caption'])")
-          python tiktok_stealth_uploader.py --video output/final.mp4 --caption "$CAPTION"
+#      - name: Run TikTok Stealth Upload
+#        # Only run TikTok for the original channel for now (as requested: "just for youtube now")
+#        if: matrix.channel == 'oracle_feed'
+#        env:
+#          TIKTOK_COOKIES: ${{ secrets.TIKTOK_COOKIES }}
+#        run: |
+#          echo "$TIKTOK_COOKIES" > tiktok_cookies.json
+#          # Extract caption/hashtags from metadata.json safely
+#          CAPTION=$(python3 -c "import json; print(json.load(open('temp/metadata.json'))['caption'])")
+#          python tiktok_stealth_uploader.py --video output/final.mp4 --caption "$CAPTION"
 
       - name: Package Video & Metadata for Download
         if: always()

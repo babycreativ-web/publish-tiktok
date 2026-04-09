@@ -27,7 +27,7 @@ def get_youtube_client(suffix=""):
     )
     return build("youtube", "v3", credentials=credentials)
 
-def upload_short(video_path, title, description, channel_id="oracle_feed"):
+def upload_short(video_path, title, description, channel_id="deep_dark_intel"):
     chan_config = load_channel_config(channel_id)
     suffix = chan_config.get("env_suffix", "") if chan_config else ""
     
@@ -107,7 +107,7 @@ if __name__ == "__main__":
     parser.add_argument("--channel", type=str, help="Channel ID to run")
     args = parser.parse_args()
     
-    channel_id = args.channel or "oracle_feed"
+    channel_id = args.channel or "deep_dark_intel"
 
     # Load metadata
     metadata_path = "temp/metadata.json"

@@ -19,7 +19,7 @@ def run():
     args = parser.parse_args()
 
     # Load channel config if specified
-    channel_id = args.channel or "oracle_feed"
+    channel_id = args.channel or "deep_dark_intel"
     chan_config = load_channel_config(channel_id)
     
     # Create folders
