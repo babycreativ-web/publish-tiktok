@@ -16,7 +16,10 @@ def get_youtube_client(suffix=""):
 
     if not all([client_id, client_secret, refresh_token]):
         print(f"❌ YouTube credentials missing for suffix '{suffix}'.")
+        print(f"   (Checked: ID={'found' if client_id else 'missing'}, Secret={'found' if client_secret else 'missing'}, Token={'found' if refresh_token else 'missing'})")
         return None
+
+    print(f"🔑 Using YouTube Credentials with suffix: '{suffix}'")
 
     credentials = google.oauth2.credentials.Credentials(
         None,

@@ -61,6 +61,8 @@ jobs:
         env:
           YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
           YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          YOUTUBE_CLIENT_ID_DEEPDARK: ${{ secrets.YOUTUBE_CLIENT_ID_DEEPDARK }}
+          YOUTUBE_CLIENT_SECRET_DEEPDARK: ${{ secrets.YOUTUBE_CLIENT_SECRET_DEEPDARK }}
           YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
           YOUTUBE_REFRESH_TOKEN_DEEPDARK: ${{ secrets.YOUTUBE_REFRESH_TOKEN_DEEPDARK }}
         run: python youtube_uploader.py --channel ${{ matrix.channel }}
@@ -69,6 +71,8 @@ jobs:
         env:
           YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
           YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          YOUTUBE_CLIENT_ID_DEEPDARK: ${{ secrets.YOUTUBE_CLIENT_ID_DEEPDARK }}
+          YOUTUBE_CLIENT_SECRET_DEEPDARK: ${{ secrets.YOUTUBE_CLIENT_SECRET_DEEPDARK }}
           YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
           YOUTUBE_REFRESH_TOKEN_DEEPDARK: ${{ secrets.YOUTUBE_REFRESH_TOKEN_DEEPDARK }}
         run: python stats_fetcher.py --channel ${{ matrix.channel }} || true
