@@ -3,10 +3,9 @@ import requests
 from config import ELEVEN_API_KEYS  # Kept for compatibility if used elsewhere, but not used here
 
 # Voice settings
-VOICE_ID = "en-US-EmmaMultilingualNeural" # Default Free Voice
+VOICE_ID = "nova"  # Default Free Voice (warm female)
 FREE_TTS_URL = "https://tts.travisvn.com/v1/audio/speech"
-FREE_VOICE = "en-US-EmmaMultilingualNeural" # Natural Female Voice
-FREE_TTS_URL = "https://tts.travisvn.com/v1/audio/speech"
+FREE_VOICE = "nova"
 
 def generate_voice(scene_text, index, voice_id=VOICE_ID):
     path = f"temp/voice_{index}.mp3"

@@ -2,6 +2,6 @@
     "id": "oracle_feed",
     "handle": "@TheOracleFeed",
     "niche": "viral storytelling",
-    "voice": "en-US-EmmaMultilingualNeural",
+    "voice": "nova",
     "env_suffix": ""
 }

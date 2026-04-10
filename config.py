@@ -31,13 +31,14 @@ TEST_NICHES = [
     "Existential Suspense"
 ]
 
-# Voice Testing (A/B testing for the best performance)
+# Voice Testing (A/B testing) — only voices supported by the free TTS (tts.travisvn.com)
 TEST_VOICES = [
-    "onyx",      # Deep, resonant, mysterious (BEST for horror/mystery)
-    "fable",     # Narrative, expressive storytelling
-    "echo",      # Mature, calm, authoritative
-    "shimmer",   # Clear, soulful, emotive
-    "en-US-EmmaMultilingualNeural" # High-quality neutral female
+    "onyx",    # Deep, resonant, mysterious (best for horror/mystery)
+    "fable",   # Narrative, expressive storytelling
+    "echo",    # Mature, calm, authoritative
+    "shimmer", # Clear, soulful, emotive
+    "nova",    # Energetic, warm female
+    "alloy",   # Balanced, neutral male
 ]
 
 # Modes for visual testing
