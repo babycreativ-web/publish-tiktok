@@ -60,17 +60,19 @@ def create_clip(video_path, text, voice_path, is_hook=False):
 def create_synced_video_clip(video_path, duration):
     # Fallback for missing assets
     if not video_path or not os.path.exists(video_path):
-        print(f"   [WARN] Missing asset: {video_path}. Using placeholder.")
-        return ColorClip(RESOLUTION, col=(30, 30, 30)).set_duration(duration).fadein(0.2).fadeout(0.2)
+        raise ValueError(f"CRITICAL ERROR: Missing visual asset: {video_path}. Halting to prevent black screen video.")
 
     # Support for AI-generated images
     if video_path.lower().endswith(('.jpg', '.jpeg', '.png')):
         # Create an image clip
         try:
-            clip = ImageClip(video_path).set_duration(duration)
+            from PIL import Image
+            import numpy as np
+            # Open with Pillow, ensure it is RGB, then convert to numpy array
+            img = np.array(Image.open(video_path).convert('RGB'))
+            clip = ImageClip(img).set_duration(duration)
         except Exception as e:
-            print(f"   [ERROR] Failed to load image {video_path}: {e}")
-            return ColorClip(RESOLUTION, col=(30, 30, 30)).set_duration(duration).fadein(0.2).fadeout(0.2)
+            raise ValueError(f"CRITICAL ERROR: Failed to load image {video_path}: {e}. Halting to prevent black screen video.")
 
         clip = clip.resize(width=RESOLUTION[0] * 1.2) # Start slightly larger for zoom
         
@@ -86,8 +88,7 @@ def create_synced_video_clip(video_path, duration):
     try:
         clip_vid = VideoFileClip(video_path)
     except Exception as e:
-        print(f"   [ERROR] Failed to load video {video_path}: {e}")
-        return ColorClip(RESOLUTION, col=(30, 30, 30)).set_duration(duration).fadein(0.2).fadeout(0.2)
+        raise ValueError(f"CRITICAL ERROR: Failed to load video {video_path}: {e}. Halting to prevent black screen video.")
 
     if clip_vid.duration < duration:
         # Loop it if it's too short
