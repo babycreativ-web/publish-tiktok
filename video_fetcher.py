@@ -107,8 +107,15 @@ def download_video(query, index, scene_text):
         for attempt, q in enumerate(queries_to_try):
             clean_query = requests.utils.quote(q)
             url = f"https://api.unsplash.com/search/photos?page=1&query={clean_query}&orientation=portrait"
-            headers_unsplash = {"Authorization": f"Client-ID {UNSPLASH_API_KEY}"}
+            headers_unsplash = {
+                "Authorization": f"Client-ID {UNSPLASH_API_KEY}",
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                "Accept-Language": "en-US,en;q=0.5"
+            }
             try:
+                import random
+                time.sleep(random.uniform(1.0, 3.5))  # Human-like delay
                 res = requests.get(url, headers=headers_unsplash, timeout=15).json()
                 results = res.get("results", [])
                 if results:
@@ -186,8 +193,15 @@ def download_image(query, index, scene_text):
     if UNSPLASH_API_KEY:
         print(f"  🔄 Pexels Image failed, falling back to Unsplash Image...")
         url = f"https://api.unsplash.com/search/photos?page=1&query={clean_query}&orientation=portrait"
-        headers_unsplash = {"Authorization": f"Client-ID {UNSPLASH_API_KEY}"}
+        headers_unsplash = {
+            "Authorization": f"Client-ID {UNSPLASH_API_KEY}",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.5"
+        }
         try:
+            import random
+            time.sleep(random.uniform(1.0, 3.5))  # Human-like delay
             res = requests.get(url, headers=headers_unsplash, timeout=10).json()
             results = res.get("results", [])
             if results:
