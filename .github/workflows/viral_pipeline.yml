@@ -10,13 +10,36 @@ on:
     - cron: '0 22 * * *'
     # 11 PM ET (03:00 UTC next day)
     - cron: '0 3 * * *'
-  workflow_dispatch: # Allows manual trigger
+  workflow_dispatch:
+    inputs:
+      channel:
+        description: 'Select channel to run (leave empty for all)'
+        required: false
+        type: choice
+        options:
+          - ''
+          - oracle_feed
+          - deep_dark_intel
+          - motivational_shorts
 
 jobs:
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      channels: ${{ steps.set-matrix.outputs.channels }}
+    steps:
+      - id: set-matrix
+        run: |
+          if [ "${{ github.event.inputs.channel }}" == "" ]; then
+            echo 'channels=["oracle_feed", "deep_dark_intel", "motivational_shorts"]' >> $GITHUB_OUTPUT
+          else
+            echo 'channels=["${{ github.event.inputs.channel }}"]' >> $GITHUB_OUTPUT
+          fi
   build-and-post:
+    needs: setup
     strategy:
       matrix:
-        channel: [oracle_feed, deep_dark_intel, motivational_shorts]
+        channel: ${{ fromJson(needs.setup.outputs.channels) }}
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout Code
