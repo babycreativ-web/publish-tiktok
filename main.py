@@ -22,6 +22,9 @@ def run():
     channel_id = args.channel or "deep_dark_intel"
     chan_config = load_channel_config(channel_id)
     
+    import shutil
+    shutil.rmtree("temp", ignore_errors=True)
+    
     # Create folders
     os.makedirs("temp", exist_ok=True)
     os.makedirs("output", exist_ok=True)
@@ -41,8 +44,8 @@ def run():
     if RANDOMIZE_TEST:
         # If we have a niche list in config, we could use that, otherwise use global TEST_NICHES
         current_niche = random.choice(TEST_NICHES) if not chan_config else chan_config.get("niche", random.choice(TEST_NICHES))
-        current_voice = random.choice(TEST_VOICES)
-        current_visual_mode = random.choice(VISUAL_MODES)
+        current_voice = chan_config.get("voice", random.choice(TEST_VOICES)) if chan_config else random.choice(TEST_VOICES)
+        current_visual_mode = chan_config.get("visual_mode", random.choice(VISUAL_MODES)) if chan_config else random.choice(VISUAL_MODES)
         print(f"\n[A/B TEST] Channel: {channel_id}")
         print(f"[A/B TEST] Selected Niche: {current_niche}")
         print(f"[A/B TEST] Selected Voice: {current_voice}")
@@ -96,6 +99,7 @@ def run():
             print(f"   [ERROR] Whisper Sync failed: {e}")
             return
 
+        last_successful_path = None
         for i, seg in enumerate(tqdm(scenes_timing, desc="Syncing Scenes", unit="scene")):
             text = seg["text"]
             duration = seg["end"] - seg["start"]
@@ -113,24 +117,45 @@ def run():
             if current_visual_mode == "videos":
                 video_path = download_video(visual_query, i, text)
             else:
-                # If images mode, use AI generated directly
-                from video_fetcher import generate_ai_image
-                video_path = generate_ai_image(text, i)
+                from video_fetcher import download_image
+                video_path = download_image(visual_query, i, text)
+
+            # --- 🛡️ VISUAL FAILOVER SYSTEM ---
+            if not video_path:
+                tqdm.write(f"   [WARN] No visual found for specific query: {visual_query}. Trying broad search...")
+                # Try a broader search using the niche/aesthetic
+                broad_query = f"{current_niche} {current_aesthetic}"
+                if current_visual_mode == "videos":
+                    video_path = download_video(broad_query, i, "broad fallback")
+                else:
+                    video_path = download_image(broad_query, i, "broad fallback")
+                
+                if not video_path and last_successful_path:
+                    tqdm.write(f"   [REUSE] Still no visual. Reusing last successful asset: {last_successful_path}")
+                    video_path = last_successful_path
+                elif not video_path:
+                    # Absolute last resort for first scene: search for "cinematic motivation"
+                    tqdm.write("   [CRITICAL] Both specific and broad search failed. Using generic placeholder query...")
+                    video_path = download_image("cinematic luxury motivation", i, "emergency fallback")
 
             if not video_path:
-                tqdm.write(f"   [WARN] No visual found for: {visual_query}")
+                tqdm.write(f"   [SKIP] Failed to find ANY visual for scene {i}. This may cause a black gap.")
                 continue
+            
+            last_successful_path = video_path
 
             # 3. Create Synced Clip (Visuals only, captions overlaid later in build_video)
             clip = create_synced_video_clip(video_path, duration)
             clips.append(clip)
     else:
         print("[ERROR] Failed to generate master audio track.")
-        return
+        import sys
+        sys.exit(1)
 
     if not clips:
         print("[ERROR] No clips generated. Check your API keys and media files.")
-        return
+        import sys
+        sys.exit(1)
 
     print("\n[INFO] Building final video with master audio sync...")
     build_video(

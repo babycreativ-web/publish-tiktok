@@ -3,5 +3,6 @@
     "handle": "@TheOracleFeed",
     "niche": "viral storytelling",
     "voice": "nova",
+    "visual_mode": "videos",
     "env_suffix": ""
 }
