@@ -22,7 +22,7 @@ You are an expert TikTok scriptwriter. Write a highly viral short script EXACTLY
 - The theme must be gritty, hard-work motivation: failure to success, being broke, rejection.
 
 # STORY STRUCTURE (5 Lines):
-Line 1 [Hook]: A shocking struggle or pain.
+Line 1 [3-SECOND HOOK]: A shocking struggle or pain. Must be exactly 10-12 words to hit the 3-second mark.
 Lines 2-3 [Build]: Specific details of the failure and people doubting them.
 Line 4 [Action]: The relentless action they took.
 Line 5 [Payoff & Loop]: The success reveal and a punchline that connects back to the start.
@@ -35,16 +35,12 @@ Create a highly viral {niche} short story for TikTok/YouTube Shorts.
 It must be a "Plot Twist", "Psychological", "Creepy/Mystery", or "Success/Regret" story within the {niche} genre.
 
 Formulas & Rules:
-- Length: EXACTLY 40 to 60 words (crucial for 10-25 second duration).
+- Length: EXACTLY 40 to 60 words (crucial for 15-25 second duration).
 - Structure: EXACTLY 5 to 6 scenes (each scene on a new line).
-- Hook (Scene 1): A shocking, irresistible curiosity or suspense hook (e.g., "A man skipped work one day... and it saved his life.")
+- Hook (Scene 1): A 3-SECOND shocking, irresistible curiosity hook. Must be 10-12 words. (e.g., "A man skipped work one day... and it saved his life.")
 - Build Tension (Scenes 2-4): Calmly narrate the events escalating.
 - Twist (Last Scene): A jaw-dropping twist or shocking reveal.
 - Loop Trick: The ending MUST connect perfectly back to the first scene's hook so it loops seamlessly.
-- You can use these ideas as inspiration if they fit the {niche} genre:
-  - "He ignored a message... that was his biggest mistake."
-  - "A simple 'yes' changed his entire life."
-  - "He trusted his best friend... and lost everything."
 - No numbering, no blank lines, no labels — just the scenes.
 - Make it dark, mysterious, or deeply surprising.
 """
