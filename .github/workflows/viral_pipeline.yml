@@ -16,7 +16,7 @@ jobs:
   build-and-post:
     strategy:
       matrix:
-        channel: [oracle_feed, deep_dark_intel]
+        channel: [oracle_feed, deep_dark_intel, motivational_shorts]
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout Code
@@ -46,6 +46,17 @@ jobs:
       - name: Install Playwright Browsers
         run: python -m playwright install chromium --with-deps
 
+      - name: Stagger Channel Generation
+        if: matrix.channel == 'deep_dark_intel' || matrix.channel == 'motivational_shorts'
+        run: |
+          if [ "${{ matrix.channel }}" == "deep_dark_intel" ]; then
+            echo "Waiting 20 minutes before starting deep_dark_intel..."
+            sleep 1200
+          elif [ "${{ matrix.channel }}" == "motivational_shorts" ]; then
+            echo "Waiting 40 minutes before starting motivational_shorts..."
+            sleep 2400
+          fi
+
       - name: Run Video Generation
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
@@ -67,6 +78,9 @@ jobs:
           YOUTUBE_CLIENT_SECRET_DEEPDARK: ${{ secrets.YOUTUBE_CLIENT_SECRET_DEEPDARK }}
           YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
           YOUTUBE_REFRESH_TOKEN_DEEPDARK: ${{ secrets.YOUTUBE_REFRESH_TOKEN_DEEPDARK }}
+          YOUTUBE_CLIENT_ID_CH3: ${{ secrets.YOUTUBE_CLIENT_ID_CH3 }}
+          YOUTUBE_CLIENT_SECRET_CH3: ${{ secrets.YOUTUBE_CLIENT_SECRET_CH3 }}
+          YOUTUBE_REFRESH_TOKEN_CH3: ${{ secrets.YOUTUBE_REFRESH_TOKEN_CH3 }}
         run: python youtube_uploader.py --channel ${{ matrix.channel }}
 
       - name: Fetch Stats and Optimize Model
@@ -77,6 +91,9 @@ jobs:
           YOUTUBE_CLIENT_SECRET_DEEPDARK: ${{ secrets.YOUTUBE_CLIENT_SECRET_DEEPDARK }}
           YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
           YOUTUBE_REFRESH_TOKEN_DEEPDARK: ${{ secrets.YOUTUBE_REFRESH_TOKEN_DEEPDARK }}
+          YOUTUBE_CLIENT_ID_CH3: ${{ secrets.YOUTUBE_CLIENT_ID_CH3 }}
+          YOUTUBE_CLIENT_SECRET_CH3: ${{ secrets.YOUTUBE_CLIENT_SECRET_CH3 }}
+          YOUTUBE_REFRESH_TOKEN_CH3: ${{ secrets.YOUTUBE_REFRESH_TOKEN_CH3 }}
         run: python stats_fetcher.py --channel ${{ matrix.channel }} || true
 
       - name: Save AI Memory to GitHub
