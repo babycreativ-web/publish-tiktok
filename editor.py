@@ -55,7 +55,7 @@ def create_clip(video_path, text, voice_path, is_hook=False):
     final = CompositeVideoClip([clip, txt])
     final = final.set_audio(voice)
     
-    return final.fadein(0.2).fadeout(0.2)
+    return final
 
 def create_synced_video_clip(video_path, duration):
     # Fallback for missing assets
@@ -82,7 +82,7 @@ def create_synced_video_clip(video_path, duration):
         
         # Crop to final resolution
         clip = clip.crop(x_center=clip.w/2, y_center=clip.h/2, width=RESOLUTION[0], height=RESOLUTION[1])
-        return clip.fadein(0.2).fadeout(0.2)
+        return clip
 
     # Standard Video Logic
     try:
@@ -99,26 +99,46 @@ def create_synced_video_clip(video_path, duration):
         clip_vid = clip_vid.subclip(0, duration)
         
     clip = clip_vid.resize(RESOLUTION)
-    return clip.fadein(0.2).fadeout(0.2)
+    return clip
 
 def build_video(clips, custom_audio_path=None, captions=None):
     import os
     os.makedirs("output", exist_ok=True)
 
-    final = concatenate_videoclips(clips, method="compose")
+    # 1. Start with the raw visual concatenation
+    visuals = concatenate_videoclips(clips, method="compose")
+    audio = None
 
-    # Overlay dynamic captions if provided
+    # 2. 🛠️ Handle Master Audio and Visual Extension FIRST
+    if custom_audio_path and os.path.exists(custom_audio_path):
+        audio = AudioFileClip(custom_audio_path)
+        
+        # If audio is longer than visuals, extend the background visuals to match
+        if audio.duration > visuals.duration:
+            print(f"   [FIX] Extending visuals to match audio... ({visuals.duration:.2f}s -> {audio.duration:.2f}s)")
+            gap = audio.duration - visuals.duration
+            
+            # Identify and extend the last visual clip
+            last_clip = clips[-1]
+            if isinstance(last_clip, ImageClip):
+                last_clip_extended = last_clip.set_duration(last_clip.duration + gap)
+            else:
+                last_clip_extended = last_clip.fx(vfx.loop, duration=last_clip.duration + gap)
+                
+            # Re-build the visual track with the extended clip
+            visuals = concatenate_videoclips(clips[:-1] + [last_clip_extended], method="compose")
+
+    # 3. 📝 Overlay dynamic captions onto the final visual track
+    final = visuals
     if captions:
         text_clips = []
         font_path = 'assets/Anton-Regular.ttf' if os.path.exists('assets/Anton-Regular.ttf') else 'Impact'
         for i, cap in enumerate(captions):
-            # First caption is a hook
             fontsize = 130 if i == 0 else 100
             color = 'yellow' if i == 0 else 'white'
             
             dur = cap["end"] - cap["start"]
-            if dur <= 0:
-                continue
+            if dur <= 0: continue
                 
             txt = TextClip(
                 cap["text"],
@@ -137,29 +157,13 @@ def build_video(clips, custom_audio_path=None, captions=None):
             text_clips.append(txt)
             
         if text_clips:
-            final = CompositeVideoClip([final] + text_clips)
+            final = CompositeVideoClip([visuals] + text_clips)
 
-    # If we have a single master audio track, use it!
-    if custom_audio_path and os.path.exists(custom_audio_path):
-        audio = AudioFileClip(custom_audio_path)
-        
-        # 🛠️ Fix Black Screen: If audio is longer than visuals, extend the visuals
-        if audio.duration > final.duration:
-            print(f"   [FIX] Extending visuals to match audio... ({final.duration:.2f}s -> {audio.duration:.2f}s)")
-            # Re-concatenating with an extended last clip to fill the gap
-            gap = audio.duration - final.duration
-            last_clip_extended = clips[-1].fx(vfx.loop, duration=clips[-1].duration + gap)
-            final = concatenate_videoclips(clips[:-1] + [last_clip_extended], method="compose")
-            
-            # Re-apply captions if they were already merged into 'final'
-            # (In our logic, captions are merged into 'final' BEFORE this block, so we need to re-overlay them if they exist)
-            if captions:
-                # Re-overlaying captions on the new extended visuals
-                final = CompositeVideoClip([final] + text_clips)
-
+    # 4. 🎵 Apply Audio
+    if audio:
         final = final.set_audio(audio)
 
-    # Background music
+    # 5. 🎹 Background Music
     try:
         bg = AudioFileClip("assets/music.mp3").volumex(0.12)
         if bg.duration < final.duration:
@@ -167,15 +171,18 @@ def build_video(clips, custom_audio_path=None, captions=None):
         else:
             bg = bg.subclip(0, final.duration)
         
-        # Merge existing voice audio with background
         if final.audio:
-            audio = CompositeAudioClip([final.audio, bg])
-            final = final.set_audio(audio)
+            final_audio = CompositeAudioClip([final.audio, bg])
+            final = final.set_audio(final_audio)
         else:
             final = final.set_audio(bg)
     except Exception:
         pass
 
+    # 6. ✨ Final Polish: Global Fade Out
+    final = final.fadeout(1.0)
+
+    # 7. 💾 Write Output
     final.write_videofile(
         "output/final.mp4",
         fps=24,
