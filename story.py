@@ -11,7 +11,26 @@ def generate_story(niche="viral storytelling"):
             return scenes
 
     print(f"   [AI] Auto-generating {niche} story with free AI...")
-    prompt = f"""
+    if niche == "mini story motivation":
+        prompt = f"""
+You are an expert TikTok scriptwriter. Write a highly viral short script EXACTLY following this "Mini Story Motivation" format.
+
+# CORE RULES (CRITICAL):
+- DO NOT INCLUDE TITLES, LABELS, NUMBERING, OR CONVERSATIONAL TEXT. OUTPUT ONLY THE SCENES.
+- EXACTLY 5 lines of text. Each line is a new script scene.
+- Total word count MUST be between 50 and 60 words. This is crucial for a 20-30 second duration.
+- The theme must be gritty, hard-work motivation: failure to success, being broke, rejection.
+
+# STORY STRUCTURE (5 Lines):
+Line 1 [Hook]: A shocking struggle or pain.
+Lines 2-3 [Build]: Specific details of the failure and people doubting them.
+Line 4 [Action]: The relentless action they took.
+Line 5 [Payoff & Loop]: The success reveal and a punchline that connects back to the start.
+
+Write ONE new story following this EXACT structure. Output ONLY the 5 scenes, one per line.
+"""
+    else:
+        prompt = f"""
 Create a highly viral {niche} short story for TikTok/YouTube Shorts. 
 It must be a "Plot Twist", "Psychological", "Creepy/Mystery", or "Success/Regret" story within the {niche} genre.
 
