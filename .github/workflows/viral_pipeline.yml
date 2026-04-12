@@ -70,7 +70,7 @@ jobs:
         run: python -m playwright install chromium --with-deps
 
       - name: Stagger Channel Generation
-        if: matrix.channel == 'deep_dark_intel' || matrix.channel == 'motivational_shorts'
+        if: github.event_name == 'schedule' && (matrix.channel == 'deep_dark_intel' || matrix.channel == 'motivational_shorts')
         run: |
           if [ "${{ matrix.channel }}" == "deep_dark_intel" ]; then
             echo "Waiting 20 minutes before starting deep_dark_intel..."
