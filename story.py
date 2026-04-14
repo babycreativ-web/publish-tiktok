@@ -1,7 +1,7 @@
 import os
 from ai_util import safe_generate_text
 
-def generate_story(niche="viral storytelling"):
+def generate_story(niche="viral storytelling", headline=None):
     # 📝 Optional Manual Override
     if os.path.exists("story.txt"):
         print("   [MANUAL] Detected story.txt — using it as manual override.")
@@ -11,7 +11,28 @@ def generate_story(niche="viral storytelling"):
             return scenes
 
     print(f"   [AI] Auto-generating {niche} story with free AI...")
-    if niche == "mini story motivation":
+    if niche == "news summary":
+        prompt = f"""
+You are an expert YouTube Shorts News Anchor. Write a high-retention, viral script for this trending story from the last 12 hours: "{headline}".
+
+# CORE RULES (CRITICAL):
+- TONE: Fast-paced, urgent, and direct. NO "Breaking news" or "Welcome back" cliches.
+- HOOK (First 3 Sec): Use a "Pattern Interrupt." (e.g., "Stop scrolling if...", "Everyone missed this...", "This literally just happened...").
+- LOOP: The final sentence must seamlessly lead into the first word of the hook (a "Curiosity Loop").
+- REPETITION: DO NOT repeat the exact same phrase or keywords from the hook at the end of the script.
+- DURATION: Aim for 55 seconds.
+- WORD COUNT: EXACTLY 130 to 150 words.
+- STRUCTURE: Exactly 8 to 10 scenes (one per line).
+
+# CONTENT STRATEGY:
+- Start with a shocking hook that creates a "Curiosity Gap."
+- Use "Bucket Brigades" (e.g. "But it gets worse," "Here is the part nobody is telling you") to maintain retention.
+- Emphasize that this happened within the LAST 12 HOURS.
+- End with a punchy conclusion that creates a natural bridge back to the first word of the video.
+
+Output ONLY the 8-10 scenes. No labels, no titles, no numbering.
+"""
+    elif niche == "mini story motivation":
         prompt = f"""
 You are an expert YouTube Shorts scriptwriter. Write a highly viral short script EXACTLY following this "Mini Story Motivation" format for YouTube Shorts.
 

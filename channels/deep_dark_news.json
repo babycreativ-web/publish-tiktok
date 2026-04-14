@@ -1,0 +1,9 @@
+{
+    "id": "deep_dark_news",
+    "handle": "@DeepDarkIntel",
+    "niche": "news summary",
+    "voice": "onyx",
+    "visual_mode": "videos",
+    "env_suffix": "_DEEPDARK",
+    "aesthetic": "breaking news footage, aerial city shots, professional broadcast lighting, cinematic 4k"
+}

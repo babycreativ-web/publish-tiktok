@@ -19,7 +19,6 @@ on:
         options:
           - ''
           - oracle_feed
-          - deep_dark_intel
           - motivational_shorts
 
 jobs:
@@ -31,7 +30,7 @@ jobs:
       - id: set-matrix
         run: |
           if [ "${{ github.event.inputs.channel }}" == "" ]; then
-            echo 'channels=["oracle_feed", "deep_dark_intel", "motivational_shorts"]' >> $GITHUB_OUTPUT
+            echo 'channels=["oracle_feed", "motivational_shorts"]' >> $GITHUB_OUTPUT
           else
             echo 'channels=["${{ github.event.inputs.channel }}"]' >> $GITHUB_OUTPUT
           fi
@@ -70,15 +69,10 @@ jobs:
         run: python -m playwright install chromium --with-deps
 
       - name: Stagger Channel Generation
-        if: github.event_name == 'schedule' && (matrix.channel == 'deep_dark_intel' || matrix.channel == 'motivational_shorts')
+        if: github.event_name == 'schedule' && matrix.channel == 'motivational_shorts'
         run: |
-          if [ "${{ matrix.channel }}" == "deep_dark_intel" ]; then
-            echo "Waiting 20 minutes before starting deep_dark_intel..."
-            sleep 1200
-          elif [ "${{ matrix.channel }}" == "motivational_shorts" ]; then
-            echo "Waiting 40 minutes before starting motivational_shorts..."
-            sleep 2400
-          fi
+          echo "Waiting 30 minutes before starting motivational_shorts..."
+          sleep 1800
 
       - name: Run Video Generation
         env:

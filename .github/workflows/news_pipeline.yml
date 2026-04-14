@@ -1,0 +1,95 @@
+name: News Testing Pipeline
+
+on:
+  schedule:
+    # Runs 4 times a day (UTC)
+    - cron: '0 10 * * *'
+    - cron: '0 15 * * *'
+    - cron: '0 20 * * *'
+    - cron: '0 1 * * *'
+  workflow_dispatch:
+    inputs:
+      category:
+        description: 'Select niche to run (leave empty for all)'
+        required: false
+        type: choice
+        options:
+          - ''
+          - politics
+          - sports
+          - tech
+          - general
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      categories: ${{ steps.set-matrix.outputs.categories }}
+    steps:
+      - id: set-matrix
+        run: |
+          if [ "${{ github.event.inputs.category }}" == "" ]; then
+            echo 'categories=["politics", "sports", "tech", "general"]' >> $GITHUB_OUTPUT
+          else
+            echo 'categories=["${{ github.event.inputs.category }}"]' >> $GITHUB_OUTPUT
+          fi
+  
+  build-and-post:
+    needs: setup
+    strategy:
+      max-parallel: 1 # Run categories sequentially to avoid rate limits
+      matrix:
+        category: ${{ fromJson(needs.setup.outputs.categories) }}
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Create Folders
+        run: mkdir -p temp output db/deep_dark_news
+
+      - name: Install System Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg imagemagick
+          sudo sed -i 's/domain="coder" rights="none" pattern="LABEL"/domain="coder" rights="read|write" pattern="LABEL"/' /etc/ImageMagick-6/policy.xml || true
+          sudo sed -i '/pattern="@\*"/d' /etc/ImageMagick-6/policy.xml || true
+
+      - name: Install Python Dependencies
+        run: |
+          pip install -r requirements.txt
+          python -m playwright install chromium --with-deps
+
+      - name: Run News Generation
+        env:
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEY_BACKUP: ${{ secrets.GEMINI_API_KEY_BACKUP }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          ELEVEN_API_KEYS: ${{ secrets.ELEVEN_API_KEYS }}
+          COHERE_API_KEY: ${{ secrets.COHERE_API_KEY }}
+          PIXABAY_API_KEY: ${{ secrets.PIXABAY_API_KEY }}
+          UNSPLASH_API_KEY: ${{ secrets.UNSPLASH_API_KEY }}
+        run: python main_news.py --channel deep_dark_news --category ${{ matrix.category }}
+
+      - name: Run YouTube Upload
+        env:
+          YOUTUBE_CLIENT_ID_DEEPDARK: ${{ secrets.YOUTUBE_CLIENT_ID_DEEPDARK }}
+          YOUTUBE_CLIENT_SECRET_DEEPDARK: ${{ secrets.YOUTUBE_CLIENT_SECRET_DEEPDARK }}
+          YOUTUBE_REFRESH_TOKEN_DEEPDARK: ${{ secrets.YOUTUBE_REFRESH_TOKEN_DEEPDARK }}
+        run: python youtube_uploader.py --channel deep_dark_news
+
+      - name: Save Memory
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add db/ || true
+          git commit -m "🤖 News Memory Update (${{ matrix.category }}) [skip ci]" || echo "No changes"
+          git pull --rebase origin main || true
+          git push origin main || echo "Push failed"
