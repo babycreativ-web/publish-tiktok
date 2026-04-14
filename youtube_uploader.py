@@ -120,8 +120,8 @@ if __name__ == "__main__":
         with open(metadata_path, "r", encoding="utf-8") as f:
             meta = json.load(f)
         
-        # In Shorts, the caption works as the Title
-        success = upload_short(video_path, meta["caption"], meta["hashtags"], channel_id=channel_id)
+        # Use the AI-generated Title and Description
+        success = upload_short(video_path, meta["title"], meta["description"], channel_id=channel_id)
         if success:
             print(f"🎉 Video is live on YouTube Shorts for channel {channel_id}!")
     else:

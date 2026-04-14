@@ -72,14 +72,14 @@ def run():
     # Pass niche to story generator
     scenes = generate_story(current_niche)
     
-    # 📝 Generate viral metadata for TikTok
+    # 📝 Generate viral metadata for YouTube Shorts
     full_story = " ".join(scenes)
-    caption, hashtags = generate_metadata(full_story)
+    title, description = generate_metadata(full_story)
     with open("temp/metadata.json", "w", encoding="utf-8") as f:
-        json.dump({"caption": caption, "hashtags": hashtags}, f)
+        json.dump({"title": title, "description": description}, f)
         
-    run_config["caption"] = caption
-    run_config["hashtags"] = hashtags
+    run_config["title"] = title
+    run_config["description"] = description
 
     # 🎤 GLOBAL SYNC MODE: Generate one master voiceover for the entire story
     print(f"[INFO] GLOBAL SYNC MODE: Creating master audio track (Voice: {current_voice})...")

@@ -13,7 +13,7 @@ def generate_story(niche="viral storytelling"):
     print(f"   [AI] Auto-generating {niche} story with free AI...")
     if niche == "mini story motivation":
         prompt = f"""
-You are an expert TikTok scriptwriter. Write a highly viral short script EXACTLY following this "Mini Story Motivation" format.
+You are an expert YouTube Shorts scriptwriter. Write a highly viral short script EXACTLY following this "Mini Story Motivation" format for YouTube Shorts.
 
 # CORE RULES (CRITICAL):
 - DO NOT INCLUDE TITLES, LABELS, NUMBERING, OR CONVERSATIONAL TEXT. OUTPUT ONLY THE SCENES.
@@ -31,7 +31,7 @@ Write ONE new story following this EXACT structure. Output ONLY the 5 scenes, on
 """
     else:
         prompt = f"""
-Create a highly viral {niche} short story for TikTok/YouTube Shorts. 
+Create a highly viral {niche} short story for YouTube Shorts. 
 It must be a "Plot Twist", "Psychological", "Creepy/Mystery", or "Success/Regret" story within the {niche} genre.
 
 Formulas & Rules:
@@ -57,25 +57,25 @@ def get_visual_query(scene, theme="cinematic storytelling"):
     return text.strip().replace('"', '')
 
 def generate_metadata(story_text):
-    print("   [AI] Generating viral caption and hashtags...")
+    print("   [AI] Generating viral YouTube metadata...")
     prompt = f"""
-Based on this story, create a viral TikTok caption and 5 relevant hashtags.
+Based on this story, create a viral YouTube Shorts title and description.
 Format your response EXACTLY like this (nothing else):
-CAPTION: [Your hook-driven caption here]
-HASHTAGS: #tag1 #tag2 #tag3 #tag4 #tag5
+TITLE: [Your viral 100-character title here]
+DESCRIPTION: [Your description with hashtags here]
 
 Story:
 {story_text}
 """
     response = safe_generate_text(prompt)
     
-    caption = ""
-    hashtags = ""
+    title = ""
+    description = ""
     
     for line in response.split("\n"):
-        if line.startswith("CAPTION:"):
-            caption = line.replace("CAPTION:", "").strip()
-        elif line.startswith("HASHTAGS:"):
-            hashtags = line.replace("HASHTAGS:", "").strip()
+        if line.startswith("TITLE:"):
+            title = line.replace("TITLE:", "").strip()
+        elif line.startswith("DESCRIPTION:"):
+            description = line.replace("DESCRIPTION:", "").strip()
             
-    return caption, hashtags
+    return title, description
