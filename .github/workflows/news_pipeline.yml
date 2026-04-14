@@ -33,22 +33,33 @@ jobs:
   setup:
     runs-on: ubuntu-latest
     outputs:
-      categories: ${{ steps.set-matrix.outputs.categories }}
+      category: ${{ steps.pick-category.outputs.category }}
     steps:
-      - id: set-matrix
+      - id: pick-category
         run: |
-          if [ "${{ github.event.inputs.category }}" == "" ]; then
-            echo 'categories=["politics", "sports", "tech", "general", "relations", "makeup", "gaming", "crypto", "celebrities", "truecrime", "fitness", "food", "finance"]' >> $GITHUB_OUTPUT
+          if [ "${{ github.event.inputs.category }}" != "" ]; then
+            echo "category=${{ github.event.inputs.category }}" >> $GITHUB_OUTPUT
           else
-            echo 'categories=["${{ github.event.inputs.category }}"]' >> $GITHUB_OUTPUT
+            # Rotate through 13 categories: 4 per day, different topic each slot
+            CATEGORIES=("politics" "sports" "tech" "general" "relations" "makeup" "gaming" "crypto" "celebrities" "truecrime" "fitness" "food" "finance")
+            DAY=$(date +%j)  # Day of year (1-365)
+            HOUR=$(date -u +%H)  # Current UTC hour
+            
+            # Map each cron slot to a slot number (0-3)
+            if [ "$HOUR" -eq 10 ]; then SLOT=0
+            elif [ "$HOUR" -eq 15 ]; then SLOT=1
+            elif [ "$HOUR" -eq 20 ]; then SLOT=2
+            else SLOT=3
+            fi
+            
+            INDEX=$(( (DAY * 4 + SLOT) % 13 ))
+            PICKED="${CATEGORIES[$INDEX]}"
+            echo "category=$PICKED" >> $GITHUB_OUTPUT
+            echo "📰 Day $DAY, Slot $SLOT -> Category: $PICKED"
           fi
-  
+
   build-and-post:
     needs: setup
-    strategy:
-      max-parallel: 1 # Run categories sequentially to avoid rate limits
-      matrix:
-        category: ${{ fromJson(needs.setup.outputs.categories) }}
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout Code
@@ -85,7 +96,7 @@ jobs:
           COHERE_API_KEY: ${{ secrets.COHERE_API_KEY }}
           PIXABAY_API_KEY: ${{ secrets.PIXABAY_API_KEY }}
           UNSPLASH_API_KEY: ${{ secrets.UNSPLASH_API_KEY }}
-        run: python main_news.py --channel deep_dark_news --category ${{ matrix.category }}
+        run: python main_news.py --channel deep_dark_news --category ${{ needs.setup.outputs.category }}
 
       - name: Run YouTube Upload
         env:
@@ -106,6 +117,6 @@ jobs:
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           git add db/ || true
-          git commit -m "🤖 News Memory Update (${{ matrix.category }}) [skip ci]" || echo "No changes"
+          git commit -m "🤖 News Memory Update (${{ needs.setup.outputs.category }}) [skip ci]" || echo "No changes"
           git pull --rebase origin main || true
           git push origin main || echo "Push failed"
