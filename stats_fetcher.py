@@ -47,6 +47,7 @@ def fetch_stats_and_optimize(channel_id="oracle_feed"):
     now = datetime.datetime.now(datetime.timezone.utc)
     best_views = -1
     best_config = None
+    category_stats = {}  # Track performance per news category
 
     for entry in history:
         video_id = entry.get("youtube_video_id")
@@ -65,9 +66,16 @@ def fetch_stats_and_optimize(channel_id="oracle_feed"):
                 pass
         
         views = get_video_stats(youtube, video_id)
-        print(f"📊 Video {video_id} ('{entry.get('niche')}') -> {views} views.")
+        label = entry.get('category') or entry.get('niche') or 'unknown'
+        print(f"📊 Video {video_id} ('{label}') -> {views} views.")
         
-        entry['views'] = views # Cache the views
+        entry['views'] = views  # Cache the views
+
+        # Track category/niche performance
+        if label not in category_stats:
+            category_stats[label] = {"total_views": 0, "count": 0}
+        category_stats[label]["total_views"] += views
+        category_stats[label]["count"] += 1
 
         # Highest views wins
         if views > best_views:
@@ -78,10 +86,33 @@ def fetch_stats_and_optimize(channel_id="oracle_feed"):
     with open(history_file, "w") as f:
         json.dump(history, f, indent=4)
 
-    if best_config and best_views > 100: # Baseline optimization threshold
-        print(f"\n🏆 WINNER FOUND: '{best_config.get('niche')}' with {best_views} views!")
+    # Save category performance breakdown
+    if category_stats:
+        perf_file = os.path.join(db_dir, "performance.json")
+        perf_data = {}
+        for cat, data in category_stats.items():
+            avg = data["total_views"] / data["count"] if data["count"] > 0 else 0
+            perf_data[cat] = {
+                "total_views": data["total_views"],
+                "video_count": data["count"],
+                "avg_views": round(avg, 1)
+            }
+        # Sort by avg views descending
+        perf_data = dict(sorted(perf_data.items(), key=lambda x: x[1]["avg_views"], reverse=True))
+        
+        with open(perf_file, "w") as f:
+            json.dump(perf_data, f, indent=4)
+        
+        print(f"\n📈 Category/Niche Performance:")
+        for cat, data in perf_data.items():
+            print(f"   {cat}: {data['avg_views']} avg views ({data['video_count']} videos)")
+
+    if best_config and best_views > 100:  # Baseline optimization threshold
+        label = best_config.get('category') or best_config.get('niche')
+        print(f"\n🏆 WINNER FOUND: '{label}' with {best_views} views!")
         winner_data = {
             "niche": best_config.get("niche"),
+            "category": best_config.get("category"),
             "voice": best_config.get("voice"),
             "visual_mode": best_config.get("visual_mode"),
             "winning_views": best_views,

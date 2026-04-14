@@ -85,6 +85,13 @@ jobs:
           YOUTUBE_REFRESH_TOKEN_DEEPDARK: ${{ secrets.YOUTUBE_REFRESH_TOKEN_DEEPDARK }}
         run: python youtube_uploader.py --channel deep_dark_news
 
+      - name: Fetch Stats and Optimize
+        env:
+          YOUTUBE_CLIENT_ID_DEEPDARK: ${{ secrets.YOUTUBE_CLIENT_ID_DEEPDARK }}
+          YOUTUBE_CLIENT_SECRET_DEEPDARK: ${{ secrets.YOUTUBE_CLIENT_SECRET_DEEPDARK }}
+          YOUTUBE_REFRESH_TOKEN_DEEPDARK: ${{ secrets.YOUTUBE_REFRESH_TOKEN_DEEPDARK }}
+        run: python stats_fetcher.py --channel deep_dark_news || true
+
       - name: Save Memory
         run: |
           git config --global user.name 'github-actions[bot]'
