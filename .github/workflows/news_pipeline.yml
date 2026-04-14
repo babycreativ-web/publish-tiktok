@@ -19,6 +19,15 @@ on:
           - sports
           - tech
           - general
+          - relations
+          - makeup
+          - gaming
+          - crypto
+          - celebrities
+          - truecrime
+          - fitness
+          - food
+          - finance
 
 jobs:
   setup:
@@ -29,7 +38,7 @@ jobs:
       - id: set-matrix
         run: |
           if [ "${{ github.event.inputs.category }}" == "" ]; then
-            echo 'categories=["politics", "sports", "tech", "general"]' >> $GITHUB_OUTPUT
+            echo 'categories=["politics", "sports", "tech", "general", "relations", "makeup", "gaming", "crypto", "celebrities", "truecrime", "fitness", "food", "finance"]' >> $GITHUB_OUTPUT
           else
             echo 'categories=["${{ github.event.inputs.category }}"]' >> $GITHUB_OUTPUT
           fi

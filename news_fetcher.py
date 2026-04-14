@@ -12,10 +12,22 @@ def fetch_top_news(category="general"):
     
     # Map friendly names to search queries (US-focused + Viral/Trending)
     query_map = {
+        # Original niches
         "politics": "trending politics news USA breaking",
         "sports": "viral sports highlights trending USA",
         "tech": "latest AI technology breakthrough trending",
-        "general": "viral trending news USA breaking"
+        "general": "viral trending news USA breaking",
+        # New niches
+        "relations": "relationship dating love advice viral trending",
+        "makeup": "beauty makeup skincare viral trending tutorial",
+        "gaming": "gaming news viral esports trending",
+        # Bonus high-viral niches
+        "crypto": "cryptocurrency bitcoin crypto news trending breaking",
+        "celebrities": "celebrity gossip Hollywood viral trending breaking",
+        "truecrime": "true crime mystery case breaking viral USA",
+        "fitness": "fitness workout health transformation viral trending",
+        "food": "food recipe viral trending TikTok USA",
+        "finance": "money investing personal finance trending viral USA",
     }
     
     query = query_map.get(category.lower(), category)
