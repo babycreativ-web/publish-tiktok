@@ -157,11 +157,12 @@ def run():
         import sys
         sys.exit(1)
 
-    print("\n[INFO] Building final video with master audio sync...")
+    print("\n[INFO] Building final video with master audio sync and modern captions...")
     build_video(
         clips, 
         custom_audio_path=master_audio if os.path.exists(master_audio) else None,
-        captions=captions
+        captions=captions,
+        caption_style="modern"
     )
     
     # Save history to channel-specific path

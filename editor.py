@@ -101,7 +101,7 @@ def create_synced_video_clip(video_path, duration):
     clip = clip_vid.resize(RESOLUTION)
     return clip
 
-def build_video(clips, custom_audio_path=None, captions=None):
+def build_video(clips, custom_audio_path=None, captions=None, caption_style="classic"):
     import os
     os.makedirs("output", exist_ok=True)
 
@@ -133,26 +133,40 @@ def build_video(clips, custom_audio_path=None, captions=None):
     if captions:
         text_clips = []
         font_path = 'assets/Anton-Regular.ttf' if os.path.exists('assets/Anton-Regular.ttf') else 'Impact'
+        
+        # Modern TikTok style settings
+        if caption_style == "modern":
+            stroke_width = 5
+            colors = ['yellow', 'white', '#00FF00'] # Vibrant green matching user reference
+        else:
+            stroke_width = 3
+            colors = ['white']
+
         for i, cap in enumerate(captions):
-            fontsize = 130 if i == 0 else 100
-            color = 'yellow' if i == 0 else 'white'
+            # Styling logic
+            if caption_style == "modern":
+                fontsize = 130 # Consistently large for TikTok style
+                color = colors[i % len(colors)] # Rotate colors for "pop"
+            else:
+                fontsize = 130 if i == 0 else 100
+                color = 'yellow' if i == 0 else 'white'
             
             dur = cap["end"] - cap["start"]
             if dur <= 0: continue
                 
             txt = TextClip(
-                cap["text"],
+                cap["text"].upper() if caption_style == "modern" else cap["text"],
                 fontsize=fontsize,
                 color=color,
                 font=font_path,
                 stroke_color='black',
-                stroke_width=3,
+                stroke_width=stroke_width,
                 method='caption',
                 size=(1000, None),
                 align='center'
             ).set_start(cap["start"]).set_end(cap["end"])
             
-            y_pos = int(RESOLUTION[1] * 0.65)
+            y_pos = int(RESOLUTION[1] * 0.60 if caption_style == "modern" else RESOLUTION[1] * 0.65)
             txt = txt.set_position(('center', y_pos))
             text_clips.append(txt)
             

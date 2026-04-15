@@ -102,8 +102,8 @@ def run_news_pipeline():
         print("❌ No clips generated.")
         return
 
-    print("🎬 Building final video...")
-    build_video(clips, custom_audio_path=master_audio, captions=captions)
+    print("🎬 Building final video with modern captions...")
+    build_video(clips, custom_audio_path=master_audio, captions=captions, caption_style="modern")
     
     # Save History
     history_file = os.path.join(db_dir, "history.json")
