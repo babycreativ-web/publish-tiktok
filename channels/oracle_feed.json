@@ -1,8 +1,9 @@
 {
     "id": "oracle_feed",
     "handle": "@TheOracleFeed",
-    "niche": "viral storytelling",
+    "niche": "Mind-Bending Horror / Glitch in the Matrix",
     "voice": "nova",
     "visual_mode": "videos",
+    "aesthetic": "uncanny, surreal, liminal spaces, dark cinematic, glitch transitions",
     "env_suffix": ""
 }

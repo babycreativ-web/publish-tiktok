@@ -1,12 +1,12 @@
 name: News Testing Pipeline
 
 on:
-  schedule:
-    # Runs 4 times a day (UTC)
-    - cron: '0 10 * * *'
-    - cron: '0 15 * * *'
-    - cron: '0 20 * * *'
-    - cron: '0 1 * * *'
+#  schedule:
+#    # Runs 4 times a day (UTC) - offset by 30 mins for 3rd channel stagger
+#    - cron: '30 12 * * *'
+#    - cron: '30 16 * * *'
+#    - cron: '30 21 * * *'
+#    - cron: '30 1 * * *'
   workflow_dispatch:
     inputs:
       category:
@@ -46,9 +46,9 @@ jobs:
             HOUR=$(date -u +%H)  # Current UTC hour
             
             # Map each cron slot to a slot number (0-3)
-            if [ "$HOUR" -eq 10 ]; then SLOT=0
-            elif [ "$HOUR" -eq 15 ]; then SLOT=1
-            elif [ "$HOUR" -eq 20 ]; then SLOT=2
+            if [ "$HOUR" -eq 12 ]; then SLOT=0
+            elif [ "$HOUR" -eq 16 ]; then SLOT=1
+            elif [ "$HOUR" -eq 21 ]; then SLOT=2
             else SLOT=3
             fi
             

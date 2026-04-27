@@ -11,44 +11,42 @@ def generate_story(niche="viral storytelling", headline=None):
             return scenes
 
     print(f"   [AI] Auto-generating {niche} story with free AI...")
-    if niche == "news summary":
+    if niche == "Mind-Bending Horror / Glitch in the Matrix":
         prompt = f"""
-You are an expert YouTube Shorts News Anchor. Write a high-retention, viral script for this trending story from the last 12 hours: "{headline}".
+You are an expert at "Uncanny Valley" and "Glitch in the Matrix" storytelling. Write a viral YouTube Short script.
+- TONE: Eerie, whisper-like, unsettling.
+- HOOK: A perspective-shifting statement that makes the viewer question reality.
+- STORY: A brief, unsettling observation about everyday life being "wrong."
+- TWIST: A final line that loops perfectly into the hook, making it an infinite loop of existential dread.
+- DURATION: 15-20 seconds.
+- WORD COUNT: 40-50 words.
+- STRUCTURE: Exactly 5 scenes (one per line).
 
-# CORE RULES (CRITICAL):
-- TONE: Fast-paced, urgent, and direct. NO "Breaking news" or "Welcome back" cliches.
-- HOOK (First 3 Sec): Use a "Pattern Interrupt." (e.g., "Stop scrolling if...", "Everyone missed this...", "This literally just happened...").
-- LOOP: The final sentence must seamlessly lead into the first word of the hook (a "Curiosity Loop").
-- REPETITION: DO NOT repeat the exact same phrase or keywords from the hook at the end of the script.
-- DURATION: Aim for 55 seconds.
-- WORD COUNT: EXACTLY 130 to 150 words.
-- STRUCTURE: Exactly 8 to 10 scenes (one per line).
-
-# CONTENT STRATEGY:
-- Start with a shocking hook that creates a "Curiosity Gap."
-- Use "Bucket Brigades" (e.g. "But it gets worse," "Here is the part nobody is telling you") to maintain retention.
-- Emphasize that this happened within the LAST 12 HOURS.
-- End with a punchy conclusion that creates a natural bridge back to the first word of the video.
-
-Output ONLY the 8-10 scenes. No labels, no titles, no numbering.
+Output ONLY the scenes.
 """
-    elif niche == "mini story motivation":
+    elif niche == "Dark History / Forbidden Knowledge":
         prompt = f"""
-You are an expert YouTube Shorts scriptwriter. Write a highly viral short script EXACTLY following this "Mini Story Motivation" format for YouTube Shorts.
+You are a historian of the "Deep Dark." Write a script about a forbidden or shocking historical secret.
+- TONE: Serious, mysterious, documentary-style.
+- HOOK: "The world wasn't ready for this..." or "They tried to bury this story for 50 years..."
+- CONTENT: A shocking, unknown fact about a famous person, event, or secret project.
+- DURATION: 40-50 seconds.
+- WORD COUNT: 100-120 words.
+- STRUCTURE: Exactly 7-8 scenes (one per line).
 
-# CORE RULES (CRITICAL):
-- DO NOT INCLUDE TITLES, LABELS, NUMBERING, OR CONVERSATIONAL TEXT. OUTPUT ONLY THE SCENES.
-- EXACTLY 5 lines of text. Each line is a new script scene.
-- Total word count MUST be between 50 and 60 words. This is crucial for a 20-30 second duration.
-- The theme must be gritty, hard-work motivation: failure to success, being broke, rejection.
+Output ONLY the scenes.
+"""
+    elif niche == "Stoic Psychology / Focus Challenges":
+        prompt = f"""
+You are a Stoic sensei. Write a script for a "Focus Challenge" or "Mindset Shift."
+- TONE: Calm, powerful, authoritative.
+- HOOK: An interactive challenge: "Don't blink," "Observe your current thought," or "Stop reacting for 10 seconds."
+- LESSON: A core Stoic principle (Marcus Aurelius/Seneca style) applied to modern stress.
+- DURATION: 15-25 seconds.
+- WORD COUNT: 50-60 words.
+- STRUCTURE: Exactly 5 scenes (one per line).
 
-# STORY STRUCTURE (5 Lines):
-Line 1 [3-SECOND HOOK]: A shocking struggle or pain. Must be exactly 10-12 words to hit the 3-second mark.
-Lines 2-3 [Build]: Specific details of the failure and people doubting them.
-Line 4 [Action]: The relentless action they took.
-Line 5 [Payoff & Loop]: The success reveal and a punchline that connects back to the start.
-
-Write ONE new story following this EXACT structure. Output ONLY the 5 scenes, one per line.
+Output ONLY the scenes.
 """
     else:
         prompt = f"""
@@ -58,12 +56,11 @@ It must be a "Plot Twist", "Psychological", "Creepy/Mystery", or "Success/Regret
 Formulas & Rules:
 - Length: EXACTLY 40 to 60 words (crucial for 15-25 second duration).
 - Structure: EXACTLY 5 to 6 scenes (each scene on a new line).
-- Hook (Scene 1): A 3-SECOND shocking, irresistible curiosity hook. Must be 10-12 words. (e.g., "A man skipped work one day... and it saved his life.")
+- Hook (Scene 1): A 3-SECOND shocking, irresistible curiosity hook. Must be 10-12 words.
 - Build Tension (Scenes 2-4): Calmly narrate the events escalating.
 - Twist (Last Scene): A jaw-dropping twist or shocking reveal.
 - Loop Trick: The ending MUST connect perfectly back to the first scene's hook so it loops seamlessly.
 - No numbering, no blank lines, no labels — just the scenes.
-- Make it dark, mysterious, or deeply surprising.
 """
 
     text = safe_generate_text(prompt)

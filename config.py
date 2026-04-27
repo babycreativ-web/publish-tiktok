@@ -22,7 +22,7 @@ TIKTOK_CLIENT_KEY = os.getenv("TIKTOK_CLIENT_KEY")
 TIKTOK_CLIENT_SECRET = os.getenv("TIKTOK_CLIENT_SECRET")
 
 # --- A/B TESTING & OPTIMIZATION ---
-RANDOMIZE_TEST = True
+RANDOMIZE_TEST = False  # Disabled: channels now use their configured niches
 ANALYSIS_INTERVAL_DAYS = 5
 
 TEST_NICHES = [

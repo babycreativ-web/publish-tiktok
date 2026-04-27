@@ -1,9 +1,9 @@
 {
     "id": "deep_dark_news",
     "handle": "@DeepDarkIntel",
-    "niche": "news summary",
+    "niche": "Dark History / Forbidden Knowledge",
     "voice": "onyx",
     "visual_mode": "videos",
     "env_suffix": "_DEEPDARK",
-    "aesthetic": "breaking news footage, aerial city shots, professional broadcast lighting, cinematic 4k"
+    "aesthetic": "vintage noir, grainy film, classified documents, mysterious textures, dark archives"
 }

@@ -2,14 +2,8 @@ name: Viral Video Pipeline
 
 on:
   schedule:
-    # 8 AM ET (12:00 UTC)
-    - cron: '0 12 * * *'
-    # 1 PM ET (17:00 UTC)
-    - cron: '0 17 * * *'
-    # 6 PM ET (22:00 UTC)
-    - cron: '0 22 * * *'
-    # 11 PM ET (03:00 UTC next day)
-    - cron: '0 3 * * *'
+    # Once per day at 11 AM ET (15:00 UTC) — quality over quantity
+    - cron: '0 15 * * *'
   workflow_dispatch:
     inputs:
       channel:
@@ -20,6 +14,7 @@ on:
           - ''
           - oracle_feed
           - motivational_shorts
+          - deep_dark_news
 
 jobs:
   setup:
@@ -30,7 +25,7 @@ jobs:
       - id: set-matrix
         run: |
           if [ "${{ github.event.inputs.channel }}" == "" ]; then
-            echo 'channels=["oracle_feed", "motivational_shorts"]' >> $GITHUB_OUTPUT
+            echo 'channels=["oracle_feed", "motivational_shorts", "deep_dark_news"]' >> $GITHUB_OUTPUT
           else
             echo 'channels=["${{ github.event.inputs.channel }}"]' >> $GITHUB_OUTPUT
           fi
@@ -69,10 +64,15 @@ jobs:
         run: python -m playwright install chromium --with-deps
 
       - name: Stagger Channel Generation
-        if: github.event_name == 'schedule' && matrix.channel == 'motivational_shorts'
+        if: github.event_name == 'schedule' && matrix.channel != 'oracle_feed'
         run: |
-          echo "Waiting 30 minutes before starting motivational_shorts..."
-          sleep 1800
+          if [ "${{ matrix.channel }}" == "motivational_shorts" ]; then
+            echo "Waiting 10 minutes before starting motivational_shorts..."
+            sleep 600
+          elif [ "${{ matrix.channel }}" == "deep_dark_news" ]; then
+            echo "Waiting 20 minutes before starting deep_dark_news..."
+            sleep 1200
+          fi
 
       - name: Run Video Generation
         env:
@@ -112,6 +112,19 @@ jobs:
           YOUTUBE_CLIENT_SECRET_CH3: ${{ secrets.YOUTUBE_CLIENT_SECRET_CH3 }}
           YOUTUBE_REFRESH_TOKEN_CH3: ${{ secrets.YOUTUBE_REFRESH_TOKEN_CH3 }}
         run: python stats_fetcher.py --channel ${{ matrix.channel }} || true
+
+      - name: Cleanup Low View Videos (<10 views after 24h)
+        env:
+          YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          YOUTUBE_CLIENT_ID_DEEPDARK: ${{ secrets.YOUTUBE_CLIENT_ID_DEEPDARK }}
+          YOUTUBE_CLIENT_SECRET_DEEPDARK: ${{ secrets.YOUTUBE_CLIENT_SECRET_DEEPDARK }}
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+          YOUTUBE_REFRESH_TOKEN_DEEPDARK: ${{ secrets.YOUTUBE_REFRESH_TOKEN_DEEPDARK }}
+          YOUTUBE_CLIENT_ID_CH3: ${{ secrets.YOUTUBE_CLIENT_ID_CH3 }}
+          YOUTUBE_CLIENT_SECRET_CH3: ${{ secrets.YOUTUBE_CLIENT_SECRET_CH3 }}
+          YOUTUBE_REFRESH_TOKEN_CH3: ${{ secrets.YOUTUBE_REFRESH_TOKEN_CH3 }}
+        run: python cleanup_channel.py --channel ${{ matrix.channel }} || true
 
       - name: Save AI Memory to GitHub
         run: |
